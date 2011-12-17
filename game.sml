@@ -11,9 +11,7 @@ struct
                    left : bool ref,
                    right : bool ref}
 
-  datatype intent = GoLeft | GoRight | StandStill
-  datatype direction = Left | Right 
-
+  datatype direction = Left | Right
 
 
   (* Constants *)
@@ -40,7 +38,7 @@ struct
                     | VerticalLine of int
                     | HorizontalLine of int
                     | RoboPlatform of boosters
-                    | Dude
+                    | Dude of boosters * (direction ref)
 
   structure B = BDDWorld( 
                 struct type fixture_data = unit
@@ -78,7 +76,7 @@ struct
                            allow_sleep = false,
                            awake = true,
                            fixed_rotation = true,
-                           bullet = true (* mass < 1.0*),
+                           bullet = false,
                            active = true,
                            data = RoboPlatform (new_boosters ()),
                            inertia_scale = 1.0
@@ -92,7 +90,7 @@ struct
                              (),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.1)
-          val () = B.Fixture.set_friction (fixture, 0.3)
+          val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
   val rp = create_roboplatform (BDDMath.vec2 (0.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
@@ -121,7 +119,7 @@ struct
                            fixed_rotation = true,
                            bullet = false,
                            active = true,
-                           data = Dude,
+                           data = Dude (new_boosters(), ref Right),
                            inertia_scale = 1.0
                          })
           val density = mass / meter_width * meter_height
@@ -133,11 +131,11 @@ struct
                              (),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
-          val () = B.Fixture.set_friction (fixture, 0.0)
+          val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~5.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-(*  val RoboPlatform rpboosters = B.Body.get_data rp *)
+  val dudebody = create_dude (BDDMath.vec2 (~5.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
 
 
   fun create_text_body (text : string)
@@ -163,7 +161,7 @@ struct
                            allow_sleep = false,
                            awake = true,
                            fixed_rotation = true,
-                           bullet = true (* mass < 1.0*),
+                           bullet = false,
                            active = true,
                            data = Text {text = text,
                                         width = pixel_width,
@@ -201,7 +199,7 @@ struct
                            allow_sleep = false,
                            awake = true,
                            fixed_rotation = true,
-                           bullet = true,
+                           bullet = false,
                            active = true,
                            data = VerticalLine pixel_height,
                            inertia_scale = 1.0
@@ -236,7 +234,7 @@ struct
                            allow_sleep = false,
                            awake = true,
                            fixed_rotation = true,
-                           bullet = true,
+                           bullet = false,
                            active = true,
                            data = HorizontalLine pixel_width,
                            inertia_scale = 1.0
@@ -341,6 +339,17 @@ struct
           val () = if !right
                    then B.Body.apply_force (rp, BDDMath.vec2 (~10.0, 0.0), zero )
                    else ()
+                        
+          val {bottom, left, right} = dudeboosters
+          val () = if !bottom
+                   then B.Body.apply_force (dudebody, BDDMath.vec2 (0.0, 30.0), zero )
+                   else ()
+          val () = if !left
+                   then B.Body.apply_force (dudebody, BDDMath.vec2 (~5.0, 0.0), zero )
+                   else ()
+          val () = if !right
+                   then B.Body.apply_force (dudebody, BDDMath.vec2 (5.0, 0.0), zero )
+                   else ()
       in () end
 
   val lasttime = ref (Time.now ())
@@ -407,11 +416,15 @@ struct
                              val y1 = y - 15
                              val () = SDL.blitall (roboplat, screen, x1, y1)
                          in () end
-                       | Dude =>
-                         let val x1 = x - 10
-                             val y1 = y - 15
-                             val () = SDL.blitall (duderight, screen, x1, y1)
-                         in () end
+                       | Dude (_, dir) =>
+                         (case !dir of
+                              Right => SDL.blitall (duderight, screen,
+                                                        x - 10, y - 15)
+                            | Left => SDL.blitall (dudeleft, screen,
+                                                   x - 10, y - 15)
+                         )
+ 
+
                     )
             in drawbodies screen (B.Body.get_next b) end
           | NONE => ()
@@ -436,6 +449,24 @@ struct
     | keyDown (SDL.SDLK_DOWN)  ControlRoboPlatform = 
       ((#bottom rpboosters) := true; SOME ControlRoboPlatform)
 
+    | keyDown (SDL.SDLK_RIGHT)  ControlDude =
+      ((#right dudeboosters) := true;
+       dudedir := Right;
+       SOME ControlDude)
+    | keyDown (SDL.SDLK_LEFT) ControlDude =
+      ((#left dudeboosters) := true;
+       dudedir := Left;
+       SOME ControlDude)
+
+    | keyDown (SDL.SDLK_SPACE) ControlDude = 
+      (B.Body.apply_linear_impulse (dudebody,
+                                    BDDMath.vec2 (0.0, 1.0),
+                                    zero);
+       SOME ControlDude)
+
+    | keyDown (SDL.SDLK_f) ControlRoboPlatform = SOME ControlDude
+    | keyDown (SDL.SDLK_f) ControlDude = SOME ControlRoboPlatform
+
     | keyDown _ s = SOME s
 
   fun keyUp (SDL.SDLK_RIGHT) ControlRoboPlatform =
@@ -444,6 +475,14 @@ struct
       ((#left rpboosters) := false; SOME ControlRoboPlatform)
     | keyUp (SDL.SDLK_DOWN)  ControlRoboPlatform = 
       ((#bottom rpboosters) := false; SOME ControlRoboPlatform)
+
+    | keyUp (SDL.SDLK_RIGHT)  ControlDude =
+      ((#right dudeboosters) := false; SOME ControlDude)
+    | keyUp (SDL.SDLK_LEFT) ControlDude =
+      ((#left dudeboosters) := false; SOME ControlDude)
+
+(*    | keyUp (SDL.SDLK_SPACE) ControlDude = 
+      ((#bottom dudeboosters) := false; SOME ControlDude) *)
 
     | keyUp _ s = SOME s
 
