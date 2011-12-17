@@ -1,14 +1,20 @@
 structure Game :> GAME =
 struct
   (* Types *)
-  type state = unit 
+  datatype controlmode = ControlDude | ControlRoboPlatform
+  type state = controlmode 
   type screen = SDL.surface
+
+
 
   type boosters = {bottom : bool ref,
                    left : bool ref,
                    right : bool ref}
 
-  datatype dudeintent = GoLeft | GoRight | StandStill
+  datatype intent = GoLeft | GoRight | StandStill
+  datatype direction = Left | Right 
+
+
 
   (* Constants *)
   val width = 800
@@ -108,7 +114,7 @@ struct
                            angle = 0.0,
                            linear_velocity = v,
                            angular_velocity = 0.0,
-                           linear_damping = 0.0,
+                           linear_damping = 1.0,
                            angular_damping = 0.0,
                            allow_sleep = false,
                            awake = true,
@@ -127,7 +133,7 @@ struct
                              (),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
-          val () = B.Fixture.set_friction (fixture, 10.0)
+          val () = B.Fixture.set_friction (fixture, 0.0)
       in body end
 
   val dudebody = create_dude (BDDMath.vec2 (~5.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
@@ -244,7 +250,7 @@ struct
                              (),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.0)
-          val () = B.Fixture.set_friction (fixture, 1.0)
+          val () = B.Fixture.set_friction (fixture, 0.2)
       in () end
 
 
@@ -317,7 +323,7 @@ struct
           (xi, yi)
       end
 
-  val initstate = ()
+  val initstate = ControlRoboPlatform
   
   fun initscreen screen =
   (
@@ -390,12 +396,12 @@ struct
                              val () =
                                  if !left
                                  then SDL.blitall (leftbooster, screen,
-                                                   x - 24, y - 3)
+                                                   x - 24, y - 2)
                                  else ()
                              val () =
                                  if !right
                                  then SDL.blitall (rightbooster, screen,
-                                                   x + 15, y - 3)
+                                                   x + 15, y - 2)
                                  else ()
                              val x1 = x - 17
                              val y1 = y - 15
@@ -404,14 +410,14 @@ struct
                        | Dude =>
                          let val x1 = x - 10
                              val y1 = y - 15
-                             val () = SDL.blitall (dudeleft, screen, x1, y1)
+                             val () = SDL.blitall (duderight, screen, x1, y1)
                          in () end
                     )
             in drawbodies screen (B.Body.get_next b) end
           | NONE => ()
       )
 
-  fun render screen () =
+  fun render screen s =
   (
     SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
 
@@ -423,21 +429,21 @@ struct
   )
 
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
-    | keyDown (SDL.SDLK_RIGHT) () =
-      ((#right rpboosters) := true; SOME ())
-    | keyDown (SDL.SDLK_LEFT)  () =
-      ((#left rpboosters) := true; SOME ())
-    | keyDown (SDL.SDLK_DOWN)  () = 
-      ((#bottom rpboosters) := true; SOME ())
+    | keyDown (SDL.SDLK_RIGHT)  ControlRoboPlatform =
+      ((#right rpboosters) := true; SOME ControlRoboPlatform)
+    | keyDown (SDL.SDLK_LEFT) ControlRoboPlatform =
+      ((#left rpboosters) := true; SOME ControlRoboPlatform)
+    | keyDown (SDL.SDLK_DOWN)  ControlRoboPlatform = 
+      ((#bottom rpboosters) := true; SOME ControlRoboPlatform)
 
     | keyDown _ s = SOME s
 
-  fun keyUp (SDL.SDLK_RIGHT) () =
-      ((#right rpboosters) := false; SOME ())
-    | keyUp (SDL.SDLK_LEFT)  () =
-      ((#left rpboosters) := false; SOME ())
-    | keyUp (SDL.SDLK_DOWN)  () = 
-      ((#bottom rpboosters) := false; SOME ())
+  fun keyUp (SDL.SDLK_RIGHT) ControlRoboPlatform =
+      ((#right rpboosters) := false; SOME ControlRoboPlatform)
+    | keyUp (SDL.SDLK_LEFT)  ControlRoboPlatform =
+      ((#left rpboosters) := false; SOME ControlRoboPlatform)
+    | keyUp (SDL.SDLK_DOWN)  ControlRoboPlatform = 
+      ((#bottom rpboosters) := false; SOME ControlRoboPlatform)
 
     | keyUp _ s = SOME s
 
