@@ -26,9 +26,27 @@ struct
                       val (fa, fb) = get_fixtures c
                       val (ida, idb) = (B.Fixture.get_data fa,
                                         B.Fixture.get_data fb)
-                  in if ida = id orelse idb = id
-                     then raise CanJump
-                     else ()
+                      open BDDTypes
+                      val n = #local_normal m
+                  in case (ida = id, idb = id, #typ m) of
+                         (true, _, EFaceA) => 
+                            if BDDMath.dot2(n, BDDMath.vec2 (0.0, ~1.0)) > 0.0
+                            then raise CanJump
+                            else ()
+                       | (true, _, EFaceB) => 
+                            if BDDMath.dot2(n, BDDMath.vec2 (0.0, 1.0)) > 0.0
+                            then raise CanJump
+                            else ()
+                       | (_, true, EFaceA) => 
+                            if BDDMath.dot2(n, BDDMath.vec2 (0.0, 1.0)) > 0.0
+                            then raise CanJump
+                            else ()
+                       | (_, true, EFaceB) => 
+                            if BDDMath.dot2(n, BDDMath.vec2 (0.0, ~1.0)) > 0.0
+                            then raise CanJump
+                            else ()
+                       | _ => ()
+
                   end
               else ()
               
@@ -220,9 +238,6 @@ struct
       ((#right dudeboosters) := false; SOME ControlDude)
     | keyUp (SDL.SDLK_LEFT) ControlDude =
       ((#left dudeboosters) := false; SOME ControlDude)
-
-(*    | keyUp (SDL.SDLK_SPACE) ControlDude = 
-      ((#bottom dudeboosters) := false; SOME ControlDude) *)
 
     | keyUp _ s = SOME s
 
