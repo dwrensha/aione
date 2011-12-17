@@ -11,5 +11,6 @@ sml-lib/crypt/mersenne-twister.sml
 font.sml
 
 types.sml
+initworld.sml
 
 game.sml
