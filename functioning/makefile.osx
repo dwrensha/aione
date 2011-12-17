@@ -1,5 +1,5 @@
-OUTPUT_APP=Awesome
-ICON=media/graphics/ExplatTheRobot.icns
+OUTPUT_APP=AIone
+ICON=media/graphics/NotProcessing.icns
 OUTPUT_EXE=game.exe
 MAKE=make
 
