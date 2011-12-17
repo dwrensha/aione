@@ -4,6 +4,10 @@ struct
   type state = unit 
   type screen = SDL.surface
 
+  type boosters = {bottom : bool ref,
+                   left : bool ref,
+                   right : bool ref}
+
   (* Constants *)
   val width = 800
   val height = 600
@@ -21,7 +25,7 @@ struct
                                height : int}
                     | VerticalLine of int
                     | HorizontalLine of int
-                    | RoboPlatform
+                    | RoboPlatform of boosters
 
   structure B = BDDWorld( 
                 struct type fixture_data = unit
@@ -32,11 +36,15 @@ struct
   
   val gravity = BDDMath.vec2 (0.0, ~10.0) 
   val world = B.World.world (gravity, true)
+  val () = B.World.set_auto_clear_forces (world,  true)
 
+  fun new_boosters () = {bottom = ref false,
+                         left = ref false,
+                         right = ref false}
 
   fun create_roboplatform (p : BDDMath.vec2)
                           (v : BDDMath.vec2)
-                          (mass : real) : unit = 
+                          (mass : real) : B.body = 
       let val pixel_width = 30
           val pixel_height = 30
           val meter_width = (Real.fromInt pixel_width) /
@@ -57,7 +65,7 @@ struct
                            fixed_rotation = true,
                            bullet = true (* mass < 1.0*),
                            active = true,
-                           data = RoboPlatform,
+                           data = RoboPlatform (new_boosters ()),
                            inertia_scale = 1.0
                          })
           val density = mass / meter_width * meter_height
@@ -70,9 +78,10 @@ struct
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.1)
           val () = B.Fixture.set_friction (fixture, 0.3)
-      in () end
+      in body end
 
-  val () = create_roboplatform (BDDMath.vec2 (0.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val rp = create_roboplatform (BDDMath.vec2 (0.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val RoboPlatform rpboosters = B.Body.get_data rp
 
   fun create_text_body (text : string)
                        (p : BDDMath.vec2)
@@ -201,7 +210,7 @@ struct
           val y = mag * (Math.sin theta)
       in BDDMath.vec2 (x, y) end
 
-  val () = Util.for 0 5 (fn y =>
+  val () = Util.for 0 2 (fn y =>
                create_text_body "hydrogen" 
                                 (random_vector 9.0)
                                 (random_vector 5.0)
@@ -230,11 +239,14 @@ struct
                             22.2
 
 
+
+
   val () = create_wall (BDDMath.vec2 (~15.0, 0.0)) 24.0
 
   val () = create_wall (BDDMath.vec2 (15.0, 0.0)) 24.0
 
   val () = create_ceiling (BDDMath.vec2 (0.0, 12.0)) 30.0
+
   val () = create_ceiling (BDDMath.vec2 (0.0, ~12.0)) 30.0
 
 
@@ -261,6 +273,19 @@ struct
     SDL.flip screen
   )
 
+  fun applyboosters () =
+      let val {bottom, left, right} = rpboosters
+          val () = if !bottom
+                   then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 30.0), zero )
+                   else ()
+          val () = if !left
+                   then B.Body.apply_force (rp, BDDMath.vec2 (10.0, 0.0), zero )
+                   else ()
+          val () = if !right
+                   then B.Body.apply_force (rp, BDDMath.vec2 (~10.0, 0.0), zero )
+                   else ()
+      in () end
+
   val lasttime = ref (Time.now ())
 
   fun dophysics () = 
@@ -270,6 +295,12 @@ struct
           val millis = IntInf.toString (Time.toMilliseconds (diff))
           val () = B.World.step (world, Time.toReal diff,
                                  10, 10)
+
+ (* For some reason, FLAG_CLEAR_FORCES gets reset to false
+    whenever I create an object.
+    TODO track this down. is it a bug?*)
+          val () = B.World.clear_forces world
+
       in () end
       
 
@@ -298,7 +329,7 @@ struct
                              val x1 = x + (w div 2)
                              val () = SDL.drawline (screen, x0, y, x1, y, white)
                          in () end
-                       | RoboPlatform =>
+                       | RoboPlatform _ =>
                          let val x1 = x - 17
                              val y1 = y - 16
                              val () = SDL.blitall (roboplat, screen, x1, y1)
@@ -312,15 +343,33 @@ struct
   fun render screen () =
   (
     SDL.clearsurface (screen, SDL.color (0w0,0w0,0w0,0w0));
+
+    applyboosters();
     dophysics ();
     drawbodies screen (B.World.get_body_list world);
+    
     SDL.flip screen
   )
 
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
+    | keyDown (SDL.SDLK_RIGHT) () =
+      ((#right rpboosters) := true; SOME ())
+    | keyDown (SDL.SDLK_LEFT)  () =
+      ((#left rpboosters) := true; SOME ())
+    | keyDown (SDL.SDLK_DOWN)  () = 
+      ((#bottom rpboosters) := true; SOME ())
+
     | keyDown _ s = SOME s
 
-  fun keyUp _ s = SOME s
+  fun keyUp (SDL.SDLK_RIGHT) () =
+      ((#right rpboosters) := false; SOME ())
+    | keyUp (SDL.SDLK_LEFT)  () =
+      ((#left rpboosters) := false; SOME ())
+    | keyUp (SDL.SDLK_DOWN)  () = 
+      ((#bottom rpboosters) := false; SOME ())
+
+    | keyUp _ s = SOME s
+
 
   fun handle_event (SDL.E_KeyDown {sym=k}) s = keyDown k s
     | handle_event (SDL.E_KeyUp {sym=k}) s = keyUp k s
