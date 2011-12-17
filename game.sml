@@ -19,6 +19,7 @@ struct
 
 
    val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
+   val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
 
   datatype bodytype = Text of {text : string,
                                width : int,
@@ -329,11 +330,16 @@ struct
                              val x1 = x + (w div 2)
                              val () = SDL.drawline (screen, x0, y, x1, y, white)
                          in () end
-                       | RoboPlatform _ =>
-                         let val x1 = x - 17
+                       | RoboPlatform {bottom, left, right} =>
+                         let 
+                             val () =
+                                 if !bottom
+                                 then SDL.blitall (bottombooster, screen,
+                                                   x - 3, y + 15)
+                                 else ()
+                             val x1 = x - 17
                              val y1 = y - 16
                              val () = SDL.blitall (roboplat, screen, x1, y1)
-
                          in () end
                     )
             in drawbodies screen (B.Body.get_next b) end
