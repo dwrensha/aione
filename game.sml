@@ -21,6 +21,7 @@ struct
                                height : int}
                     | VerticalLine of int
                     | HorizontalLine of int
+                    | RoboPlatform
 
   structure B = BDDWorld( 
                 struct type fixture_data = unit
@@ -29,9 +30,49 @@ struct
                 end
                 )
   
-  val gravity = BDDMath.vec2 (0.0, ~1.0) 
+  val gravity = BDDMath.vec2 (0.0, ~10.0) 
   val world = B.World.world (gravity, true)
 
+
+  fun create_roboplatform (p : BDDMath.vec2)
+                          (v : BDDMath.vec2)
+                          (mass : real) : unit = 
+      let val pixel_width = 30
+          val pixel_height = 30
+          val meter_width = (Real.fromInt pixel_width) /
+                            (Real.fromInt pixelsPerMeter)
+          val meter_height = (Real.fromInt pixel_height) /
+                             (Real.fromInt pixelsPerMeter)
+          val body = B.World.create_body
+                         (world,
+                          {typ = B.Body.Dynamic,
+                           position = p,
+                           angle = 0.0,
+                           linear_velocity = v,
+                           angular_velocity = 0.0,
+                           linear_damping = 0.0,
+                           angular_damping = 0.0,
+                           allow_sleep = false,
+                           awake = true,
+                           fixed_rotation = true,
+                           bullet = true (* mass < 1.0*),
+                           active = true,
+                           data = RoboPlatform,
+                           inertia_scale = 1.0
+                         })
+          val density = mass / meter_width * meter_height
+          val fixture = B.Body.create_fixture_default
+                            (body,
+                             BDDShape.Polygon
+                                 (BDDPolygon.box (meter_width / 2.0,
+                                                  meter_height / 2.0)),
+                             (),
+                             density)
+          val () = B.Fixture.set_restitution (fixture, 0.1)
+          val () = B.Fixture.set_friction (fixture, 0.3)
+      in () end
+
+  val () = create_roboplatform (BDDMath.vec2 (0.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
 
   fun create_text_body (text : string)
                        (p : BDDMath.vec2)
@@ -107,7 +148,7 @@ struct
                                                   meter_height / 2.0)),
                              (),
                              10000.0)
-          val () = B.Fixture.set_restitution (fixture, 1.0)
+          val () = B.Fixture.set_restitution (fixture, 0.2)
           val () = B.Fixture.set_friction (fixture, 0.0)
       in () end
 
@@ -142,7 +183,7 @@ struct
                                                   0.2)),
                              (),
                              10000.0)
-          val () = B.Fixture.set_restitution (fixture, 1.0)
+          val () = B.Fixture.set_restitution (fixture, 0.2)
           val () = B.Fixture.set_friction (fixture, 0.0)
       in () end
 
@@ -257,6 +298,12 @@ struct
                              val x1 = x + (w div 2)
                              val () = SDL.drawline (screen, x0, y, x1, y, white)
                          in () end
+                       | RoboPlatform =>
+                         let val x1 = x - 17
+                             val y1 = y - 16
+                             val () = SDL.blitall (roboplat, screen, x1, y1)
+
+                         in () end
                     )
             in drawbodies screen (B.Body.get_next b) end
           | NONE => ()
@@ -267,7 +314,6 @@ struct
     SDL.clearsurface (screen, SDL.color (0w0,0w0,0w0,0w0));
     dophysics ();
     drawbodies screen (B.World.get_body_list world);
-    SDL.blitall (roboplat, screen, 100, 100);
     SDL.flip screen
   )
 
