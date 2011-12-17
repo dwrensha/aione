@@ -29,7 +29,7 @@ struct
                 end
                 )
   
-  val gravity = BDDMath.vec2 (0.0, 0.0) 
+  val gravity = BDDMath.vec2 (0.0, ~1.0) 
   val world = B.World.world (gravity, true)
 
 
@@ -84,7 +84,7 @@ struct
                  Real.round (meter_height * (Real.fromInt pixelsPerMeter))
           val body = B.World.create_body
                          (world,
-                          {typ = B.Body.Dynamic,
+                          {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
                            linear_velocity = zero,
@@ -119,7 +119,7 @@ struct
                  Real.round (meter_width * (Real.fromInt pixelsPerMeter))
           val body = B.World.create_body
                          (world,
-                          {typ = B.Body.Dynamic,
+                          {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
                            linear_velocity = zero,
