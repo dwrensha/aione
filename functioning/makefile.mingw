@@ -1,0 +1,29 @@
+OUTPUT_EXE=game.exe
+MAKE=make
+
+# You shouldn't have to edit anything below this line
+
+MLTON_FLAGS=@MLton max-heap 200m -- -cc-opt "-I/usr/local/include" -link-opt "`SDL/sdl-config --libs` -lSDL_image -ltiff -lpng -ljpeg -lz" -default-ann 'allowFFI true'
+
+default: game
+
+bin:
+	mkdir bin
+
+bin/sdlml.o: bin sdlml/sdlml.c
+	gcc -DLINUX -O `sdl-config --cflags` -c sdlml/sdlml.c -o bin/sdlml.o
+
+.PHONY: game
+game: bin/sdlml.o
+	mlton $(MLTON_FLAGS) -output $(OUTPUT_EXE) game.cm bin/sdlml.o 
+
+.PHONY: examples/*/ examples/*
+examples/*/: bin/sdlml.o
+	mlton $(MLTON_FLAGS) -output $(OUTPUT_EXE) $@sources.cm bin/sdlml.o
+examples/*:
+	$(MAKE) $@/
+
+.PHONY:clean
+clean:
+	rm -f core core.* *~ *.exe *.o bin/*
+
