@@ -20,6 +20,8 @@ struct
 
    val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
+   val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
+   val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
 
   datatype bodytype = Text of {text : string,
                                width : int,
@@ -336,6 +338,16 @@ struct
                                  if !bottom
                                  then SDL.blitall (bottombooster, screen,
                                                    x - 3, y + 15)
+                                 else ()
+                             val () =
+                                 if !left
+                                 then SDL.blitall (leftbooster, screen,
+                                                   x - 24, y - 3)
+                                 else ()
+                             val () =
+                                 if !right
+                                 then SDL.blitall (rightbooster, screen,
+                                                   x + 15, y - 4)
                                  else ()
                              val x1 = x - 17
                              val y1 = y - 16
