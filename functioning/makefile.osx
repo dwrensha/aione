@@ -1,5 +1,5 @@
 OUTPUT_APP=AIone
-ICON=media/graphics/NotProcessing.icns
+ICON=media/graphics/dude.icns
 OUTPUT_EXE=game.exe
 MAKE=make
 
