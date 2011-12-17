@@ -29,19 +29,19 @@ struct
                       open BDDTypes
                       val n = #local_normal m
                   in case (ida = id, idb = id, #typ m) of
-                         (true, _, EFaceA) => 
+                         (true, _, E_FaceA) => 
                             if BDDMath.dot2(n, BDDMath.vec2 (0.0, ~1.0)) > 0.0
                             then raise CanJump
                             else ()
-                       | (true, _, EFaceB) => 
+                       | (true, _, E_FaceB) => 
                             if BDDMath.dot2(n, BDDMath.vec2 (0.0, 1.0)) > 0.0
                             then raise CanJump
                             else ()
-                       | (_, true, EFaceA) => 
+                       | (false, true, E_FaceA) => 
                             if BDDMath.dot2(n, BDDMath.vec2 (0.0, 1.0)) > 0.0
                             then raise CanJump
                             else ()
-                       | (_, true, EFaceB) => 
+                       | (false, true, E_FaceB) => 
                             if BDDMath.dot2(n, BDDMath.vec2 (0.0, ~1.0)) > 0.0
                             then raise CanJump
                             else ()
@@ -198,10 +198,10 @@ struct
 
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
     | keyDown (SDL.SDLK_RIGHT)  ControlRoboPlatform =
-      ((#right rpboosters) := true; SOME ControlRoboPlatform)
-    | keyDown (SDL.SDLK_LEFT) ControlRoboPlatform =
       ((#left rpboosters) := true; SOME ControlRoboPlatform)
-    | keyDown (SDL.SDLK_DOWN)  ControlRoboPlatform = 
+    | keyDown (SDL.SDLK_LEFT) ControlRoboPlatform =
+      ((#right rpboosters) := true; SOME ControlRoboPlatform)
+    | keyDown (SDL.SDLK_UP)  ControlRoboPlatform = 
       ((#bottom rpboosters) := true; SOME ControlRoboPlatform)
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
@@ -213,7 +213,7 @@ struct
        dudedir := Left;
        SOME ControlDude)
 
-    | keyDown (SDL.SDLK_SPACE) ControlDude = 
+    | keyDown (SDL.SDLK_UP) ControlDude = 
       (if canjump dudebody
        then B.Body.apply_linear_impulse
                 (dudebody,
@@ -228,10 +228,10 @@ struct
     | keyDown _ s = SOME s
 
   fun keyUp (SDL.SDLK_RIGHT) ControlRoboPlatform =
-      ((#right rpboosters) := false; SOME ControlRoboPlatform)
-    | keyUp (SDL.SDLK_LEFT)  ControlRoboPlatform =
       ((#left rpboosters) := false; SOME ControlRoboPlatform)
-    | keyUp (SDL.SDLK_DOWN)  ControlRoboPlatform = 
+    | keyUp (SDL.SDLK_LEFT)  ControlRoboPlatform =
+      ((#right rpboosters) := false; SOME ControlRoboPlatform)
+    | keyUp (SDL.SDLK_UP)  ControlRoboPlatform = 
       ((#bottom rpboosters) := false; SOME ControlRoboPlatform)
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =

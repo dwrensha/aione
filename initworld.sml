@@ -238,38 +238,14 @@ open Types
           val y = mag * (Math.sin theta)
       in BDDMath.vec2 (x, y) end
 
-  val () = Util.for 0 2 (fn y =>
-               create_text_body "hydrogen" 
-                                (random_vector 9.0)
-                                (random_vector 5.0)
-                                0.1
-                         )
 
+  val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
 
-  val () = create_text_body "helium"
-                            (random_vector 9.0)
-                            (random_vector 6.0)
-                            0.4
+  val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
 
-  val () = create_text_body "krypton"
-                            (random_vector 9.0)
-                            (random_vector 6.0)
-                            8.38
+  val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
 
-  val () = create_text_body "xenon"
-                            (random_vector 9.0)
-                            (random_vector 6.0)
-                            13.12
-
-
-
-  val () = create_wall (BDDMath.vec2 (~15.0, 0.0)) 24.0
-
-  val () = create_wall (BDDMath.vec2 (15.0, 0.0)) 24.0
-
-  val () = create_ceiling (BDDMath.vec2 (0.0, 12.0)) 30.0
-
-  val () = create_ceiling (BDDMath.vec2 (0.0, ~12.0)) 30.0
+  val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
 
 
