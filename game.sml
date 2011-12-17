@@ -1,17 +1,6 @@
 structure Game :> GAME =
 struct
-  (* Types *)
-  datatype controlmode = ControlDude | ControlRoboPlatform
-  type state = controlmode 
-  type screen = SDL.surface
-
-
-
-  type boosters = {bottom : bool ref,
-                   left : bool ref,
-                   right : bool ref}
-
-  datatype direction = Left | Right
+  open Types
 
 
   (* Constants *)
@@ -32,20 +21,6 @@ struct
    val dudeleft = Graphics.requireimage "media/graphics/dudeleft.png"
 
 
-  datatype bodytype = Text of {text : string,
-                               width : int,
-                               height : int}
-                    | VerticalLine of int
-                    | HorizontalLine of int
-                    | RoboPlatform of boosters
-                    | Dude of boosters * (direction ref)
-
-  structure B = BDDWorld( 
-                struct type fixture_data = unit
-                       type body_data = bodytype
-                       type joint_data = unit
-                end
-                )
   
   val gravity = BDDMath.vec2 (0.0, ~10.0) 
   val world = B.World.world (gravity, true)
@@ -287,12 +262,6 @@ struct
                             (random_vector 9.0)
                             (random_vector 6.0)
                             13.12
-
-  val () = create_text_body "radon"
-                            (random_vector 9.0)
-                            (random_vector 6.0)
-                            22.2
-
 
 
 
