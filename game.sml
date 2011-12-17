@@ -321,7 +321,7 @@ struct
           (xi, yi)
       end
 
-  val initstate = ControlRoboPlatform
+  val initstate = ControlDude
   
   fun initscreen screen =
   (
@@ -460,7 +460,7 @@ struct
 
     | keyDown (SDL.SDLK_SPACE) ControlDude = 
       (B.Body.apply_linear_impulse (dudebody,
-                                    BDDMath.vec2 (0.0, 1.0),
+                                    BDDMath.vec2 (0.0, 4.0),
                                     zero);
        SOME ControlDude)
 
