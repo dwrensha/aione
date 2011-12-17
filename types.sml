@@ -25,7 +25,7 @@ struct
                     | Dude of boosters * (direction ref)
 
   structure B = BDDWorld( 
-                struct type fixture_data = unit
+                struct type fixture_data = int
                        type body_data = bodytype
                        type joint_data = unit
                 end

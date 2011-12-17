@@ -19,6 +19,10 @@ open Types
   val () = B.World.set_auto_clear_forces (world,  true)
 
 
+  local val counter = ref 0
+  in fun uniq () = (counter:= !counter + 1; !counter)
+  end
+
 
   fun new_boosters () = {bottom = ref false,
                          left = ref false,
@@ -56,7 +60,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             (),
+                             uniq (),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.1)
           val () = B.Fixture.set_friction (fixture, 0.5)
@@ -97,7 +101,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             (),
+                             uniq(),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
           val () = B.Fixture.set_friction (fixture, 0.5)
@@ -143,7 +147,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             (),
+                             uniq (),
                              density)
           val () = B.Fixture.set_restitution (fixture, 1.0)
           val () = B.Fixture.set_friction (fixture, 0.0)
@@ -179,7 +183,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (0.2,
                                                   meter_height / 2.0)),
-                             (),
+                             uniq (),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.2)
           val () = B.Fixture.set_friction (fixture, 0.0)
@@ -214,7 +218,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   0.2)),
-                             (),
+                             uniq (),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.0)
           val () = B.Fixture.set_friction (fixture, 0.2)

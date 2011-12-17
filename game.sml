@@ -3,8 +3,6 @@ struct
   open Types
 
 
-
-
    val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
    val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
@@ -12,10 +10,36 @@ struct
    val duderight = Graphics.requireimage "media/graphics/duderight.png"
    val dudeleft = Graphics.requireimage "media/graphics/dudeleft.png"
 
-
-  
-
   open InitWorld
+
+  exception CanJump
+
+  fun canjump b = 
+      let val p = B.Body.get_position b
+          val SOME fixture = B.Body.get_fixtures b
+          val id = B.Fixture.get_data fixture
+          open B.Contact
+          fun checkcontact c = 
+              if is_touching c
+              then
+                  let val m = get_manifold c
+                      val (fa, fb) = get_fixtures c
+                      val (ida, idb) = (B.Fixture.get_data fa,
+                                        B.Fixture.get_data fb)
+                  in if ida = id orelse idb = id
+                     then raise CanJump
+                     else ()
+                  end
+              else ()
+              
+          val r = (BDDOps.oapp
+                      B.Contact.get_next
+                      checkcontact
+                      (B.World.get_contact_list world);
+                   false)
+              handle CanJump => true
+      in r
+      end
 
 
 (*
@@ -172,9 +196,12 @@ struct
        SOME ControlDude)
 
     | keyDown (SDL.SDLK_SPACE) ControlDude = 
-      (B.Body.apply_linear_impulse (dudebody,
-                                    BDDMath.vec2 (0.0, 4.0),
-                                    zero);
+      (if canjump dudebody
+       then B.Body.apply_linear_impulse
+                (dudebody,
+                 BDDMath.vec2 (0.0, 4.0),
+                 zero)
+       else ();
        SOME ControlDude)
 
     | keyDown (SDL.SDLK_f) ControlRoboPlatform = SOME ControlDude
