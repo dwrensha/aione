@@ -60,22 +60,21 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             uniq (),
+                             (uniq (), RoboPlatformFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.1)
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val rp = create_roboplatform (BDDMath.vec2 (0.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val rparray = Array.tabulate
+                (7,
+              fn i =>
+                 create_roboplatform
+                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 3), ~11.0))
+                     (BDDMath.vec2 (0.0, 0.0)) 1.0)
+
+  val rp = Array.sub (rparray, 0)
   val RoboPlatform rpboosters = B.Body.get_data rp
-
-  val _ = create_roboplatform (BDDMath.vec2 (~15.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-  val _ = create_roboplatform (BDDMath.vec2 (~10.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-  val _ = create_roboplatform (BDDMath.vec2 (~5.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-
-  val _ = create_roboplatform (BDDMath.vec2 (15.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-  val _ = create_roboplatform (BDDMath.vec2 (10.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
-  val _ = create_roboplatform (BDDMath.vec2 (5.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
 
 
   fun create_dude (p : BDDMath.vec2)
@@ -110,7 +109,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             uniq(),
+                             (uniq(), DudeFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
           val () = B.Fixture.set_friction (fixture, 0.5)
@@ -156,7 +155,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             uniq (),
+                             (uniq (), OtherFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 1.0)
           val () = B.Fixture.set_friction (fixture, 0.0)
@@ -192,7 +191,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (0.2,
                                                   meter_height / 2.0)),
-                             uniq (),
+                             (uniq (), OtherFixture),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.2)
           val () = B.Fixture.set_friction (fixture, 0.0)
@@ -227,7 +226,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   0.2)),
-                             uniq (),
+                             (uniq (), OtherFixture),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.0)
           val () = B.Fixture.set_friction (fixture, 0.2)
@@ -262,6 +261,8 @@ open Types
 
   fun contact_listener c = ()
 
+(* If dude and roboplat collide, start controlling the roboplat.
+   If roboplat collides with anything else, stop recording. *)
   val () = B.World.set_begin_contact (world, contact_listener)
       
 

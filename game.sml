@@ -17,15 +17,15 @@ struct
   fun canjump b = 
       let val p = B.Body.get_position b
           val SOME fixture = B.Body.get_fixtures b
-          val id = B.Fixture.get_data fixture
+          val (id, _) = B.Fixture.get_data fixture
           open B.Contact
           fun checkcontact c = 
               if is_touching c
               then
                   let val m = get_manifold c
                       val (fa, fb) = get_fixtures c
-                      val (ida, idb) = (B.Fixture.get_data fa,
-                                        B.Fixture.get_data fb)
+                      val ((ida, _), (idb, _)) = (B.Fixture.get_data fa,
+                                                  B.Fixture.get_data fb)
                       open BDDTypes
                       val n = #local_normal m
                   in case (ida = id, idb = id, #typ m) of
@@ -197,12 +197,12 @@ struct
   )
 
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
-    | keyDown (SDL.SDLK_RIGHT)  ControlRoboPlatform =
-      ((#left rpboosters) := true; SOME ControlRoboPlatform)
-    | keyDown (SDL.SDLK_LEFT) ControlRoboPlatform =
-      ((#right rpboosters) := true; SOME ControlRoboPlatform)
-    | keyDown (SDL.SDLK_UP)  ControlRoboPlatform = 
-      ((#bottom rpboosters) := true; SOME ControlRoboPlatform)
+    | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
+      ((#left rpboosters) := true; SOME (ControlRoboPlatform i))
+    | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
+      ((#right rpboosters) := true; SOME (ControlRoboPlatform i))
+    | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
+      ((#bottom rpboosters) := true; SOME (ControlRoboPlatform i))
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := true;
@@ -222,17 +222,17 @@ struct
        else ();
        SOME ControlDude)
 
-    | keyDown (SDL.SDLK_f) ControlRoboPlatform = SOME ControlDude
-    | keyDown (SDL.SDLK_f) ControlDude = SOME ControlRoboPlatform
+    | keyDown (SDL.SDLK_f) (ControlRoboPlatform i) = SOME ControlDude
+    | keyDown (SDL.SDLK_f) ControlDude = SOME (ControlRoboPlatform 0)
 
     | keyDown _ s = SOME s
 
-  fun keyUp (SDL.SDLK_RIGHT) ControlRoboPlatform =
-      ((#left rpboosters) := false; SOME ControlRoboPlatform)
-    | keyUp (SDL.SDLK_LEFT)  ControlRoboPlatform =
-      ((#right rpboosters) := false; SOME ControlRoboPlatform)
-    | keyUp (SDL.SDLK_UP)  ControlRoboPlatform = 
-      ((#bottom rpboosters) := false; SOME ControlRoboPlatform)
+  fun keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
+      ((#left rpboosters) := false; SOME (ControlRoboPlatform i))
+    | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
+      ((#right rpboosters) := false; SOME (ControlRoboPlatform i))
+    | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
+      ((#bottom rpboosters) := false; SOME (ControlRoboPlatform i))
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := false; SOME ControlDude)
