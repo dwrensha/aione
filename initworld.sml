@@ -285,21 +285,36 @@ open Types
           val (fa, fb) = get_fixtures c
           val (ida, tpa) = B.Fixture.get_data fa
           val (idb, tpb) = B.Fixture.get_data fb
-(*          fun plat_hits_something i *)
+
+          fun plat_hits_something i ControlDude = ()
+            | plat_hits_something i (ControlRoboPlatform j) = 
+              if i = j
+              then (mode := ControlDude;
+                    turn_off_boosters (Array.sub (rpboosterarray, j))
+                   )
+              else ()
 
           fun plat_hits_dude i ControlDude = 
               (mode := ControlRoboPlatform i;
                copy_flip_boosters (Array.sub (rpboosterarray, i)) dudeboosters;
                turn_off_boosters dudeboosters
-
                 )
-            | plat_hits_dude i (ControlRoboPlatform j) = ()
+            | plat_hits_dude i (ControlRoboPlatform j) =
+               plat_hits_something i (ControlRoboPlatform j)
+              
               
       in case (tpa, tpb) of
              (DudeFixture, RoboPlatformFixture i) => 
                 plat_hits_dude i (!mode)
            | (RoboPlatformFixture i, DudeFixture) => 
                 plat_hits_dude i (!mode)
+           | (RoboPlatformFixture i, RoboPlatformFixture j) => 
+                (plat_hits_something i (!mode);
+                 plat_hits_something j (!mode))
+           | (RoboPlatformFixture i, _) => 
+                plat_hits_something i (!mode)
+           | (_, RoboPlatformFixture i) => 
+                plat_hits_something i (!mode)
            | _ => ()
 
       end 
