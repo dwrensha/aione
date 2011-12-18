@@ -76,19 +76,19 @@ open Types
                                                   meter_height / 2.0)),
                              (uniq (), RoboPlatformFixture i),
                              density)
-          val () = B.Fixture.set_restitution (fixture, 0.1)
+          val () = B.Fixture.set_restitution (fixture, 0.05)
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
   val rparray = Array.tabulate
-                (7,
+                (5,
               fn i =>
                  create_roboplatform
                      i
-                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 3), ~11.0))
+                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~11.0))
                      (BDDMath.vec2 (0.0, 0.0)) 1.0)
   val rpboosterarray = 
-      Array.tabulate (7,
+      Array.tabulate (5,
                       fn i =>
                          let val RoboPlatform bst
                                  = B.Body.get_data (Array.sub (rparray, i))
@@ -133,7 +133,7 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~17.0, 11.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val dudebody = create_dude (BDDMath.vec2 (~15.0, 11.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
   val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
 
 
@@ -273,9 +273,9 @@ open Types
 
   val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
-  val () = create_ceiling (BDDMath.vec2 (17.0, 10.0)) 2.0
+  val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 2.0
 
-  val () = create_ceiling (BDDMath.vec2 (~17.0, 10.0)) 2.0
+  val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 2.0
 
 
 (* If dude and roboplat collide, start controlling the roboplat.
@@ -295,10 +295,20 @@ open Types
               else ()
 
           fun plat_hits_dude i ControlDude = 
-              (mode := ControlRoboPlatform i;
-               copy_flip_boosters (Array.sub (rpboosterarray, i)) dudeboosters;
-               turn_off_boosters dudeboosters
-                )
+              let val dp = B.Body.get_position dudebody
+                  val pp = B.Body.get_position (Array.sub (rparray, i))
+                  val d = BDDMath.vec2sub (pp, dp)
+              in
+                  if BDDMath.vec2y d > ~0.5
+                  then
+                      (mode := ControlRoboPlatform i;
+                       copy_flip_boosters
+                           (Array.sub (rpboosterarray, i)) dudeboosters;
+                       turn_off_boosters dudeboosters
+                      )
+                  else ()
+              end
+
             | plat_hits_dude i (ControlRoboPlatform j) =
                plat_hits_something i (ControlRoboPlatform j)
               
