@@ -29,7 +29,8 @@ open Types
 
   val (playback : playbackmode ref) = ref NotPlaying
 
-
+  val recordingstart = ref (Time.now ())
+  val (recordingevents : (Time.time * BoosterEvent) list ref ) = ref nil
 
   fun new_boosters () = {bottom = ref false,
                          left = ref false,
@@ -364,7 +365,14 @@ open Types
           fun plat_hits_something i ControlDude = ()
             | plat_hits_something i (ControlRoboPlatform j) = 
               if i = j
-              then (mode := ControlDude;
+              then (* end recording *)
+                  (mode := ControlDude;
+                   Array.update (scripts, i, {events = List.rev (!recordingevents),
+                                              remaining = ref nil});
+
+                   copy_flip_boosters dudeboosters
+                       (Array.sub (rpboosterarray, i));
+                   (#bottom dudeboosters) := false;
                     turn_off_boosters (Array.sub (rpboosterarray, j))
                    )
               else ()
@@ -375,8 +383,10 @@ open Types
                   val d = BDDMath.vec2sub (pp, dp)
               in
                   if BDDMath.vec2y d > ~0.5
-                  then
+                  then (* start recording *)
                       (mode := ControlRoboPlatform i;
+                       recordingstart := Time.now ();
+                       recordingevents := nil;
                        copy_flip_boosters
                            (Array.sub (rpboosterarray, i)) dudeboosters;
                        turn_off_boosters dudeboosters
