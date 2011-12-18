@@ -278,6 +278,7 @@ struct
        SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
        
        SDL.blitall (victory, screen, 26, 29);
+       Font.Huge.draw (screen, 100, 290, "you win");
        SDL.flip screen
       )
 
@@ -351,8 +352,12 @@ struct
     | keyUp _ s = SOME 1
 
 
-  fun handle_event (SDL.E_KeyDown {sym=k}) s = keyDown k (!mode)
-    | handle_event (SDL.E_KeyUp {sym=k}) s = keyUp k (!mode)
+  fun handle_event (SDL.E_KeyDown {sym=k}) 1 = keyDown k (!mode)
+    | handle_event (SDL.E_KeyUp {sym=k}) 1 = keyUp k (!mode)
+    | handle_event _ 1 = SOME 1
+
+    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_SPACE}) 2 = NONE
+    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_ESCAPE}) 2 = NONE
     | handle_event _ s = SOME s
 
 
