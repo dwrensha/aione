@@ -2,7 +2,7 @@ structure Types =
 struct
 
 
-  type state = unit
+  type state = int (* room number *)
   type screen = SDL.surface
 
 

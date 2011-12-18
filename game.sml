@@ -12,7 +12,8 @@ struct
    val dudeleft = Graphics.requireimage "media/graphics/dudeleft.png"
    val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
    val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
-
+   val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
+   val victory = Graphics.requireimage "media/graphics/victory.png"
 
   open InitWorld
 
@@ -80,7 +81,7 @@ struct
           (xi, yi)
       end
 
-  val initstate = ()
+  val initstate = 1
   
   fun initscreen screen =
   (
@@ -170,6 +171,7 @@ struct
           val diff = Time.-(now, !lasttime)
           val () = lasttime := now
           val millis = IntInf.toString (Time.toMilliseconds (diff))
+
           val () = B.World.step (world, Time.toReal diff,
                                  10, 10)
 
@@ -256,17 +258,28 @@ struct
           | NONE => ()
       )
 
-  fun render screen s =
+  val (exitdoorx, exitdoory) = worldToScreen (BDDMath.vec2 (14.7,12.5))
+
+  fun render screen 1 =
   (
     SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
 
+    SDL.blitall (exitdoor, screen, exitdoorx, exitdoory);
+
     doreplay (!playback);
     applyboosters ();
-    dophysics ();
+    dophysics () ;
     drawbodies screen (B.World.get_body_list world);
     
     SDL.flip screen
   )
+    | render screen 2 = 
+      (
+       SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
+       
+       SDL.blitall (victory, screen, 26, 29);
+       SDL.flip screen
+      )
 
   fun recordEvent e = 
       let val dt = Time.-(Time.now (), !recordingstart)
@@ -279,57 +292,63 @@ struct
     | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
       (#left (Array.sub (rpboosterarray, i) ) := true;
        recordEvent LeftOn;
-       SOME ())
+       SOME 1)
     | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
       (#right (Array.sub (rpboosterarray, i) ) := true;
        recordEvent RightOn;
-       SOME ())
+       SOME 1)
     | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
       (#bottom (Array.sub (rpboosterarray, i) ) := true;
        recordEvent BottomOn;
-       SOME ())
+       SOME 1)
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := true;
        dudedir := Right;
-       SOME ())
+       SOME 1)
     | keyDown (SDL.SDLK_LEFT) ControlDude =
       ((#left dudeboosters) := true;
        dudedir := Left;
-       SOME ())
+       SOME 1)
 
     | keyDown (SDL.SDLK_UP) ControlDude = 
-      (if canjump dudebody
-       then B.Body.apply_linear_impulse
-                (dudebody,
-                 BDDMath.vec2 (0.0, 3.0),
-                 zero)
-       else ();
-       SOME ())
-
-    | keyDown _ s = SOME ()
+      let val p = B.Body.get_position dudebody
+          val (x, y) = worldToScreen p
+      in if abs (x - exitdoorx) < 15 andalso
+            abs (y - exitdoory) < 15
+         then SOME 2 (* you win *)
+         else
+             (if canjump dudebody
+              then B.Body.apply_linear_impulse
+                       (dudebody,
+                        BDDMath.vec2 (0.0, 3.0),
+                        zero)
+              else ();
+              SOME 1)
+      end
+    | keyDown _ s = SOME 1
 
   fun keyUp (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
 
     | keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
       (#left (Array.sub (rpboosterarray, i) ) := false;
        recordEvent LeftOff;
-       SOME ())
+       SOME 1)
     | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
       (#right (Array.sub (rpboosterarray, i) ) := false;
        recordEvent RightOff;
-       SOME ())
+       SOME 1)
     | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
       (#bottom (Array.sub (rpboosterarray, i) ) := false;
        recordEvent BottomOff;
-       SOME ())
+       SOME 1)
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =
-      ((#right dudeboosters) := false; SOME ())
+      ((#right dudeboosters) := false; SOME 1)
     | keyUp (SDL.SDLK_LEFT) ControlDude =
-      ((#left dudeboosters) := false; SOME ())
+      ((#left dudeboosters) := false; SOME 1)
 
-    | keyUp _ s = SOME ()
+    | keyUp _ s = SOME 1
 
 
   fun handle_event (SDL.E_KeyDown {sym=k}) s = keyDown k (!mode)
