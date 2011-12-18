@@ -369,7 +369,7 @@ open Types
                    )
               else ()
 
-          fun plat_hits_dude i ControlDude = 
+          fun plat_hits_dude i ControlDude NotPlaying = 
               let val dp = B.Body.get_position dudebody
                   val pp = B.Body.get_position (Array.sub (rparray, i))
                   val d = BDDMath.vec2sub (pp, dp)
@@ -384,8 +384,10 @@ open Types
                   else ()
               end
 
-            | plat_hits_dude i (ControlRoboPlatform j) =
+            | plat_hits_dude i (ControlRoboPlatform j) NotPlaying =
                plat_hits_something i (ControlRoboPlatform j)
+
+            | plat_hits_dude _ _ (Playing _) = ()
               
           fun dude_hits_play (Playing _) = ()
             | dude_hits_play NotPlaying =
@@ -395,9 +397,9 @@ open Types
               
       in case (tpa, tpb) of
              (DudeFixture, RoboPlatformFixture i) => 
-                plat_hits_dude i (!mode)
+                plat_hits_dude i (!mode) (!playback)
            | (RoboPlatformFixture i, DudeFixture) => 
-                plat_hits_dude i (!mode)
+                plat_hits_dude i (!mode) (!playback)
            | (RoboPlatformFixture i, RoboPlatformFixture j) => 
                 (plat_hits_something i (!mode);
                  plat_hits_something j (!mode))
