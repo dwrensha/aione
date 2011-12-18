@@ -76,7 +76,7 @@ struct
           (xi, yi)
       end
 
-  val initstate = ControlDude
+  val initstate = ()
   
   fun initscreen screen =
   (
@@ -84,16 +84,21 @@ struct
   )
 
   fun applyboosters () =
-      let val {bottom, left, right} = rpboosters
-          val () = if !bottom
-                   then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 30.0), zero )
-                   else ()
-          val () = if !left
-                   then B.Body.apply_force (rp, BDDMath.vec2 (10.0, 0.0), zero )
-                   else ()
-          val () = if !right
-                   then B.Body.apply_force (rp, BDDMath.vec2 (~10.0, 0.0), zero )
-                   else ()
+      let val () = Util.for 0 6 (fn i =>
+           let val rp = Array.sub (rparray, i)
+               val rpboosters = Array.sub (rpboosterarray, i)
+               val {bottom, left, right} = rpboosters
+               val () = if !bottom
+                        then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 30.0), zero )
+                        else ()
+               val () = if !left
+                        then B.Body.apply_force (rp, BDDMath.vec2 (10.0, 0.0), zero )
+                        else ()
+               val () = if !right
+                        then B.Body.apply_force (rp, BDDMath.vec2 (~10.0, 0.0), zero )
+                        else ()
+           in () end
+                                )
                         
           val {bottom, left, right} = dudeboosters
           val () = if !bottom
@@ -197,21 +202,22 @@ struct
   )
 
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
+
     | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
-      ((#left rpboosters) := true; SOME (ControlRoboPlatform i))
+      (#left (Array.sub (rpboosterarray, i) ) := true; SOME ())
     | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
-      ((#right rpboosters) := true; SOME (ControlRoboPlatform i))
+      (#right (Array.sub (rpboosterarray, i) ) := true; SOME ())
     | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      ((#bottom rpboosters) := true; SOME (ControlRoboPlatform i))
+      (#bottom (Array.sub (rpboosterarray, i) ) := true; SOME ())
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := true;
        dudedir := Right;
-       SOME ControlDude)
+       SOME ())
     | keyDown (SDL.SDLK_LEFT) ControlDude =
       ((#left dudeboosters) := true;
        dudedir := Left;
-       SOME ControlDude)
+       SOME ())
 
     | keyDown (SDL.SDLK_UP) ControlDude = 
       (if canjump dudebody
@@ -220,30 +226,27 @@ struct
                  BDDMath.vec2 (0.0, 4.0),
                  zero)
        else ();
-       SOME ControlDude)
+       SOME ())
 
-    | keyDown (SDL.SDLK_f) (ControlRoboPlatform i) = SOME ControlDude
-    | keyDown (SDL.SDLK_f) ControlDude = SOME (ControlRoboPlatform 0)
-
-    | keyDown _ s = SOME s
+    | keyDown _ s = SOME ()
 
   fun keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
-      ((#left rpboosters) := false; SOME (ControlRoboPlatform i))
+      (#left (Array.sub (rpboosterarray, i) ) := false; SOME ())
     | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
-      ((#right rpboosters) := false; SOME (ControlRoboPlatform i))
+      (#right (Array.sub (rpboosterarray, i) ) := false; SOME ())
     | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      ((#bottom rpboosters) := false; SOME (ControlRoboPlatform i))
+      (#bottom (Array.sub (rpboosterarray, i) ) := false; SOME ())
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =
-      ((#right dudeboosters) := false; SOME ControlDude)
+      ((#right dudeboosters) := false; SOME ())
     | keyUp (SDL.SDLK_LEFT) ControlDude =
-      ((#left dudeboosters) := false; SOME ControlDude)
+      ((#left dudeboosters) := false; SOME ())
 
-    | keyUp _ s = SOME s
+    | keyUp _ s = SOME ()
 
 
-  fun handle_event (SDL.E_KeyDown {sym=k}) s = keyDown k s
-    | handle_event (SDL.E_KeyUp {sym=k}) s = keyUp k s
+  fun handle_event (SDL.E_KeyDown {sym=k}) s = keyDown k (!mode)
+    | handle_event (SDL.E_KeyUp {sym=k}) s = keyUp k (!mode)
     | handle_event _ s = SOME s
 
 

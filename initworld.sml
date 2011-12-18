@@ -24,11 +24,25 @@ open Types
   end
 
 
+  val (recording : (int option) ref) = ref NONE
+  val (mode : controlmode ref) = ref ControlDude
+
   fun new_boosters () = {bottom = ref false,
                          left = ref false,
                          right = ref false}
 
-  fun create_roboplatform (p : BDDMath.vec2)
+  fun turn_off_boosters {bottom, left, right} =
+      (bottom := false;
+       left := false;
+       right := false)
+
+  fun copy_flip_boosters {bottom, left, right} (bst2: boosters) =
+      (bottom := !(#bottom bst2);
+       left := !(#right bst2);
+       right := !(#left bst2))
+
+  fun create_roboplatform (i : int)
+                          (p : BDDMath.vec2)
                           (v : BDDMath.vec2)
                           (mass : real) : B.body = 
       let val pixel_width = 28
@@ -60,7 +74,7 @@ open Types
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             (uniq (), RoboPlatformFixture),
+                             (uniq (), RoboPlatformFixture i),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.1)
           val () = B.Fixture.set_friction (fixture, 0.5)
@@ -70,11 +84,15 @@ open Types
                 (7,
               fn i =>
                  create_roboplatform
+                     i
                      (BDDMath.vec2 (5.0 * Real.fromInt (i - 3), ~11.0))
                      (BDDMath.vec2 (0.0, 0.0)) 1.0)
-
-  val rp = Array.sub (rparray, 0)
-  val RoboPlatform rpboosters = B.Body.get_data rp
+  val rpboosterarray = 
+      Array.tabulate (7,
+                      fn i =>
+                         let val RoboPlatform bst
+                                 = B.Body.get_data (Array.sub (rparray, i))
+                         in bst end)
 
 
   fun create_dude (p : BDDMath.vec2)
@@ -259,10 +277,33 @@ open Types
 
   val () = create_ceiling (BDDMath.vec2 (~17.0, 10.0)) 2.0
 
-  fun contact_listener c = ()
 
 (* If dude and roboplat collide, start controlling the roboplat.
    If roboplat collides with anything else, stop recording. *)
+  fun contact_listener c =
+      let open B.Contact
+          val (fa, fb) = get_fixtures c
+          val (ida, tpa) = B.Fixture.get_data fa
+          val (idb, tpb) = B.Fixture.get_data fb
+(*          fun plat_hits_something i *)
+
+          fun plat_hits_dude i ControlDude = 
+              (mode := ControlRoboPlatform i;
+               copy_flip_boosters (Array.sub (rpboosterarray, i)) dudeboosters;
+               turn_off_boosters dudeboosters
+
+                )
+            | plat_hits_dude i (ControlRoboPlatform j) = ()
+              
+      in case (tpa, tpb) of
+             (DudeFixture, RoboPlatformFixture i) => 
+                plat_hits_dude i (!mode)
+           | (RoboPlatformFixture i, DudeFixture) => 
+                plat_hits_dude i (!mode)
+           | _ => ()
+
+      end 
+
   val () = B.World.set_begin_contact (world, contact_listener)
       
 

@@ -1,8 +1,8 @@
 structure Types = 
 struct
 
-  datatype controlmode = ControlDude | ControlRoboPlatform of int
-  type state = controlmode 
+
+  type state = unit
   type screen = SDL.surface
 
 
@@ -25,8 +25,10 @@ struct
                     | Dude of boosters * (direction ref)
 
   datatype fixturetype = DudeFixture
-                       | RoboPlatformFixture
+                       | RoboPlatformFixture of int
                        | OtherFixture
+
+  datatype controlmode = ControlDude | ControlRoboPlatform of int
 
   structure B = BDDWorld( 
                 struct type fixture_data = int * fixturetype
