@@ -46,7 +46,7 @@ open Types
                            angular_velocity = 0.0,
                            linear_damping = 0.0,
                            angular_damping = 0.0,
-                           allow_sleep = false,
+                           allow_sleep = true,
                            awake = true,
                            fixed_rotation = true,
                            bullet = false,
@@ -66,8 +66,17 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val rp = create_roboplatform (BDDMath.vec2 (0.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val rp = create_roboplatform (BDDMath.vec2 (0.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
   val RoboPlatform rpboosters = B.Body.get_data rp
+
+  val _ = create_roboplatform (BDDMath.vec2 (~15.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val _ = create_roboplatform (BDDMath.vec2 (~10.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val _ = create_roboplatform (BDDMath.vec2 (~5.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+
+  val _ = create_roboplatform (BDDMath.vec2 (15.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val _ = create_roboplatform (BDDMath.vec2 (10.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+  val _ = create_roboplatform (BDDMath.vec2 (5.0, ~10.0)) (BDDMath.vec2 (0.0, 0.0)) 1.0
+
 
   fun create_dude (p : BDDMath.vec2)
                   (v : BDDMath.vec2)
@@ -107,7 +116,7 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~5.0, 0.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val dudebody = create_dude (BDDMath.vec2 (~17.0, 11.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
   val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
 
 
@@ -169,7 +178,7 @@ open Types
                            angular_velocity = 0.0,
                            linear_damping = 0.0,
                            angular_damping = 0.0,
-                           allow_sleep = false,
+                           allow_sleep = true,
                            awake = true,
                            fixed_rotation = true,
                            bullet = false,
@@ -247,6 +256,13 @@ open Types
 
   val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
+  val () = create_ceiling (BDDMath.vec2 (17.0, 10.0)) 2.0
 
+  val () = create_ceiling (BDDMath.vec2 (~17.0, 10.0)) 2.0
+
+  fun contact_listener c = ()
+
+  val () = B.World.set_begin_contact (world, contact_listener)
+      
 
 end
