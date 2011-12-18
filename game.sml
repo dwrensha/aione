@@ -4,6 +4,7 @@ struct
 
 
    val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
+   val roboplatrecording = Graphics.requireimage "media/graphics/roboplatrecording.png"
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
    val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
    val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
@@ -156,7 +157,14 @@ struct
                              val () = SDL.drawline (screen, x0, y, x1, y, white)
                          in () end
                        | RoboPlatform {bottom, left, right} =>
-                         let 
+                         let val SOME fix = B.Body.get_fixtures b
+                             val (id, fixtype) = B.Fixture.get_data fix
+                             val sprite = 
+                                 (case (!mode, fixtype) of
+                                      (ControlRoboPlatform i,
+                                       RoboPlatformFixture j) =>
+                                      if i = j then roboplatrecording else roboplat
+                                    | _ => roboplat)
                              val () =
                                  if !bottom
                                  then SDL.blitall (bottombooster, screen,
@@ -174,7 +182,7 @@ struct
                                  else ()
                              val x1 = x - 17
                              val y1 = y - 15
-                             val () = SDL.blitall (roboplat, screen, x1, y1)
+                             val () = SDL.blitall (sprite, screen, x1, y1)
                          in () end
                        | Dude (_, dir) =>
                          (case !dir of
