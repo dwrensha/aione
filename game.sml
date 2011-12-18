@@ -10,6 +10,9 @@ struct
    val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
    val duderight = Graphics.requireimage "media/graphics/duderight.png"
    val dudeleft = Graphics.requireimage "media/graphics/dudeleft.png"
+   val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
+   val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
+
 
   open InitWorld
 
@@ -105,7 +108,10 @@ struct
 
 
           fun applyevents bst nil = nil
-            | applyevents bst ((t, e)::es) = nil
+            | applyevents bst (lst as ((t, e)::es)) =
+              if (stillalive := true; Time.>(dt, t))
+              then (applyevent bst e; applyevents bst es)
+              else lst
                
       in
           Util.for 0 (number_of_rps - 1) (fn i =>
@@ -113,11 +119,12 @@ struct
                val rpboosters = Array.sub (rpboosterarray, i)
                val {bottom, left, right} = rpboosters
                val {events, remaining} = Array.sub (scripts, i)
-                            
-           in () end);
-          ()
+           in remaining := (applyevents rpboosters (!remaining))
+           end);
+          if not (!stillalive)
+          then playback := NotPlaying
+          else  ()
       end
-
 
 
   fun applyboosters () =
@@ -220,6 +227,14 @@ struct
                              val y1 = y - 15
                              val () = SDL.blitall (sprite, screen, x1, y1)
                          in () end
+                       | PlayButton =>
+                         (case !playback of
+                              Playing _ =>
+                              SDL.blitall (playbutton, screen, x - 8, y - 8)
+                            | NotPlaying =>
+                              SDL.blitall (playbuttoninactive,
+                                           screen, x - 8, y - 8)
+                         )
                        | Dude (_, dir) =>
                          (case !dir of
                               Right => SDL.blitall (duderight, screen,

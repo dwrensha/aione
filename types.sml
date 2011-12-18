@@ -34,10 +34,12 @@ struct
                     | VerticalLine of int
                     | HorizontalLine of int
                     | RoboPlatform of boosters
+                    | PlayButton
                     | Dude of boosters * (direction ref)
 
   datatype fixturetype = DudeFixture
                        | RoboPlatformFixture of int
+                       | PlayButtonFixture
                        | OtherFixture
 
   datatype controlmode = ControlDude | ControlRoboPlatform of int

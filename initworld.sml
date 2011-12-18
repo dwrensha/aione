@@ -45,6 +45,52 @@ open Types
        left := !(#right bst2);
        right := !(#left bst2))
 
+  val zero = BDDMath.vec2 (0.0, 0.0) 
+
+
+  fun create_dude (p : BDDMath.vec2)
+                  (v : BDDMath.vec2)
+                  (mass : real) : B.body = 
+      let val pixel_width = 8
+          val pixel_height = 26
+          val meter_width = (Real.fromInt pixel_width) /
+                            (Real.fromInt pixelsPerMeter)
+          val meter_height = (Real.fromInt pixel_height) /
+                             (Real.fromInt pixelsPerMeter)
+          val body = B.World.create_body
+                         (world,
+                          {typ = B.Body.Dynamic,
+                           position = p,
+                           angle = 0.0,
+                           linear_velocity = v,
+                           angular_velocity = 0.0,
+                           linear_damping = 1.0,
+                           angular_damping = 0.0,
+                           allow_sleep = false,
+                           awake = true,
+                           fixed_rotation = true,
+                           bullet = false,
+                           active = true,
+                           data = Dude (new_boosters(), ref Right),
+                           inertia_scale = 1.0
+                         })
+          val density = mass / meter_width * meter_height
+          val fixture = B.Body.create_fixture_default
+                            (body,
+                             BDDShape.Polygon
+                                 (BDDPolygon.box (meter_width / 2.0,
+                                                  meter_height / 2.0)),
+                             (uniq(), DudeFixture),
+                             density)
+          val () = B.Fixture.set_restitution (fixture, 0.00)
+          val () = B.Fixture.set_friction (fixture, 0.5)
+      in body end
+
+  val dudebody = create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
+
+
+
   fun create_roboplatform (i : int)
                           (p : BDDMath.vec2)
                           (v : BDDMath.vec2)
@@ -113,47 +159,44 @@ open Types
       end
 
 
-  fun create_dude (p : BDDMath.vec2)
-                  (v : BDDMath.vec2)
-                  (mass : real) : B.body = 
-      let val pixel_width = 8
-          val pixel_height = 26
+  fun create_playbutton
+          (p : BDDMath.vec2) : B.body = 
+      let val pixel_width = 16
+          val pixel_height = 16
           val meter_width = (Real.fromInt pixel_width) /
                             (Real.fromInt pixelsPerMeter)
           val meter_height = (Real.fromInt pixel_height) /
                              (Real.fromInt pixelsPerMeter)
           val body = B.World.create_body
                          (world,
-                          {typ = B.Body.Dynamic,
+                          {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
-                           linear_velocity = v,
+                           linear_velocity = zero,
                            angular_velocity = 0.0,
-                           linear_damping = 1.0,
+                           linear_damping = 0.0,
                            angular_damping = 0.0,
-                           allow_sleep = false,
+                           allow_sleep = true,
                            awake = true,
                            fixed_rotation = true,
                            bullet = false,
                            active = true,
-                           data = Dude (new_boosters(), ref Right),
+                           data = PlayButton,
                            inertia_scale = 1.0
                          })
-          val density = mass / meter_width * meter_height
+          val density = 1.0 / meter_width * meter_height
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
                                                   meter_height / 2.0)),
-                             (uniq(), DudeFixture),
+                             (uniq (), PlayButtonFixture),
                              density)
-          val () = B.Fixture.set_restitution (fixture, 0.00)
+          val () = B.Fixture.set_restitution (fixture, 0.05)
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
-  val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
-
+  val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
 
   fun create_text_body (text : string)
                        (p : BDDMath.vec2)
@@ -197,7 +240,7 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.0)
       in () end
 
-  val zero = BDDMath.vec2 (0.0, 0.0) 
+
 
   fun create_wall (p : BDDMath.vec2)
                   (meter_height : real) : unit = 
@@ -295,6 +338,18 @@ open Types
 
   val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
 
+  fun startplaying () =
+      (playback := (Playing (Time.now ()));
+       Util.for 0 (number_of_rps - 1) (fn i =>
+           let val rp = Array.sub (rparray, i)
+               val rpboosters = Array.sub (rpboosterarray, i)
+               val {bottom, left, right} = rpboosters
+               val {events, remaining} = Array.sub (scripts, i)
+           in remaining := events
+           end)
+      )
+
+
 
 (* If dude and roboplat collide, start controlling the roboplat.
    If roboplat collides with anything else, stop recording. *)
@@ -330,6 +385,11 @@ open Types
             | plat_hits_dude i (ControlRoboPlatform j) =
                plat_hits_something i (ControlRoboPlatform j)
               
+          fun dude_hits_play (Playing _) = ()
+            | dude_hits_play NotPlaying =
+              (startplaying ()
+              )
+              
               
       in case (tpa, tpb) of
              (DudeFixture, RoboPlatformFixture i) => 
@@ -343,6 +403,10 @@ open Types
                 plat_hits_something i (!mode)
            | (_, RoboPlatformFixture i) => 
                 plat_hits_something i (!mode)
+           | (PlayButtonFixture, DudeFixture) => 
+                dude_hits_play (!playback)
+           | (DudeFixture, PlayButtonFixture) => 
+                dude_hits_play (!playback)
            | _ => ()
 
       end 
