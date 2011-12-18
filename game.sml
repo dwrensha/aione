@@ -85,7 +85,7 @@ struct
   )
 
   fun applyboosters () =
-      let val () = Util.for 0 4 (fn i =>
+      let val () = Util.for 0 (number_of_rps - 1) (fn i =>
            let val rp = Array.sub (rparray, i)
                val rpboosters = Array.sub (rpboosterarray, i)
                val {bottom, left, right} = rpboosters

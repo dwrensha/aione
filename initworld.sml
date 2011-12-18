@@ -80,19 +80,28 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
+  val number_of_rps = 5
+
   val rparray = Array.tabulate
-                (5,
+                (number_of_rps,
               fn i =>
                  create_roboplatform
                      i
                      (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~11.0))
                      (BDDMath.vec2 (0.0, 0.0)) 1.0)
   val rpboosterarray = 
-      Array.tabulate (5,
+      Array.tabulate (number_of_rps,
                       fn i =>
                          let val RoboPlatform bst
                                  = B.Body.get_data (Array.sub (rparray, i))
                          in bst end)
+
+  val (scripts : scriptstate Array.array) =
+      Array.tabulate
+          (number_of_rps,
+        fn i => {activesince = NONE,
+                 events = nil,
+                 remaining = ref nil})
 
 
   fun create_dude (p : BDDMath.vec2)
@@ -133,7 +142,7 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~15.0, 11.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val dudebody = create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
   val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
 
 
@@ -273,9 +282,9 @@ open Types
 
   val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
-  val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 2.0
+  val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
 
-  val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 2.0
+  val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
 
 
 (* If dude and roboplat collide, start controlling the roboplat.

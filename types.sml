@@ -14,6 +14,17 @@ struct
   datatype direction = Left | Right
 
 
+  datatype BoosterEvent = BottomOn
+                        | BottomOff
+                        | LeftOn
+                        | LeftOff
+                        | RightOn
+                        | RightOff
+
+  type scriptstate = {activesince : Time.time option,
+                      events : (Time.time * BoosterEvent) list,
+                      remaining : (Time.time * BoosterEvent) list ref}
+
 
 
   datatype bodytype = Text of {text : string,
@@ -36,6 +47,7 @@ struct
                        type joint_data = unit
                 end
                 )
+
 
 
 
