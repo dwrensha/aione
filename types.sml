@@ -26,6 +26,8 @@ struct
                       remaining : (Time.time * BoosterEvent) list ref}
 
 
+  datatype playbackmode = NotPlaying | Playing of Time.time
+
 
   datatype bodytype = Text of {text : string,
                                width : int,

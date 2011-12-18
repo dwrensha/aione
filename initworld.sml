@@ -27,6 +27,10 @@ open Types
   val (recording : (int option) ref) = ref NONE
   val (mode : controlmode ref) = ref ControlDude
 
+  val (playback : playbackmode ref) = ref NotPlaying
+
+
+
   fun new_boosters () = {bottom = ref false,
                          left = ref false,
                          right = ref false}
@@ -97,11 +101,16 @@ open Types
                          in bst end)
 
   val (scripts : scriptstate Array.array) =
-      Array.tabulate
-          (number_of_rps,
-        fn i => {activesince = NONE,
-                 events = nil,
-                 remaining = ref nil})
+      let open Time
+          val cutoff = fromReal 3.0
+          val es = [(zeroTime, BottomOn), (cutoff, BottomOff)]
+      in
+          Array.tabulate
+              (number_of_rps,
+            fn i => {activesince = NONE,
+                     events = es,
+                     remaining = ref nil})
+      end
 
 
   fun create_dude (p : BDDMath.vec2)
