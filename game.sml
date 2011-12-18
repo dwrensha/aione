@@ -261,14 +261,26 @@ struct
     SDL.flip screen
   )
 
+  fun recordEvent e = 
+      let val dt = Time.-(Time.now (), !recordingstart)
+      in
+      recordingevents := ( (dt, e) :: (!recordingevents))
+      end
+
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
 
     | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
-      (#left (Array.sub (rpboosterarray, i) ) := true; SOME ())
+      (#left (Array.sub (rpboosterarray, i) ) := true;
+       recordEvent LeftOn;
+       SOME ())
     | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
-      (#right (Array.sub (rpboosterarray, i) ) := true; SOME ())
+      (#right (Array.sub (rpboosterarray, i) ) := true;
+       recordEvent RightOn;
+       SOME ())
     | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      (#bottom (Array.sub (rpboosterarray, i) ) := true; SOME ())
+      (#bottom (Array.sub (rpboosterarray, i) ) := true;
+       recordEvent BottomOn;
+       SOME ())
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := true;
@@ -290,12 +302,20 @@ struct
 
     | keyDown _ s = SOME ()
 
-  fun keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
-      (#left (Array.sub (rpboosterarray, i) ) := false; SOME ())
+  fun keyUp (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
+
+    | keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
+      (#left (Array.sub (rpboosterarray, i) ) := false;
+       recordEvent LeftOff;
+       SOME ())
     | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
-      (#right (Array.sub (rpboosterarray, i) ) := false; SOME ())
+      (#right (Array.sub (rpboosterarray, i) ) := false;
+       recordEvent RightOff;
+       SOME ())
     | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      (#bottom (Array.sub (rpboosterarray, i) ) := false; SOME ())
+      (#bottom (Array.sub (rpboosterarray, i) ) := false;
+       recordEvent BottomOff;
+       SOME ())
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =
       ((#right dudeboosters) := false; SOME ())
