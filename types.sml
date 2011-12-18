@@ -21,8 +21,7 @@ struct
                         | RightOn
                         | RightOff
 
-  type scriptstate = {activesince : Time.time option,
-                      events : (Time.time * BoosterEvent) list,
+  type scriptstate = {events : (Time.time * BoosterEvent) list,
                       remaining : (Time.time * BoosterEvent) list ref}
 
 

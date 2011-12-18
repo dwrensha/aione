@@ -107,7 +107,7 @@ open Types
       in
           Array.tabulate
               (number_of_rps,
-            fn i => {activesince = NONE,
+            fn i => {
                      events = es,
                      remaining = ref nil})
       end

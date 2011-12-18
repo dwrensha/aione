@@ -84,6 +84,42 @@ struct
     SDL.flip screen
   )
 
+  fun applyevent {bottom, left, right} BottomOn =
+      (bottom := true)
+    | applyevent {bottom, left, right} BottomOff =
+      (bottom := false)
+    | applyevent {bottom, left, right} LeftOn =
+      (left := true)
+    | applyevent {bottom, left, right} LeftOff =
+      (left := false)
+    | applyevent {bottom, left, right} RightOn =
+      (right := true)
+    | applyevent {bottom, left, right} RightOff =
+      (right := false)
+
+
+  fun doreplay NotPlaying = ()
+    | doreplay (Playing start) =
+      let val dt = Time.-(Time.now (), start)
+          val stillalive = ref false
+
+
+          fun applyevents bst nil = nil
+            | applyevents bst ((t, e)::es) = nil
+               
+      in
+          Util.for 0 (number_of_rps - 1) (fn i =>
+           let val rp = Array.sub (rparray, i)
+               val rpboosters = Array.sub (rpboosterarray, i)
+               val {bottom, left, right} = rpboosters
+               val {events, remaining} = Array.sub (scripts, i)
+                            
+           in () end);
+          ()
+      end
+
+
+
   fun applyboosters () =
       let val () = Util.for 0 (number_of_rps - 1) (fn i =>
            let val rp = Array.sub (rparray, i)
@@ -202,7 +238,8 @@ struct
   (
     SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
 
-    applyboosters();
+    doreplay (!playback);
+    applyboosters ();
     dophysics ();
     drawbodies screen (B.World.get_body_list world);
     
