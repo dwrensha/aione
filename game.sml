@@ -133,13 +133,13 @@ struct
                val rpboosters = Array.sub (rpboosterarray, i)
                val {bottom, left, right} = rpboosters
                val () = if !bottom
-                        then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 30.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 600.0), zero )
                         else ()
                val () = if !left
-                        then B.Body.apply_force (rp, BDDMath.vec2 (10.0, 0.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (200.0, 0.0), zero )
                         else ()
                val () = if !right
-                        then B.Body.apply_force (rp, BDDMath.vec2 (~10.0, 0.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (~200.0, 0.0), zero )
                         else ()
            in () end
                                 )

@@ -86,7 +86,8 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val dudebody = create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
+  val dudebody =
+      create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
   val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
 
 
@@ -138,7 +139,8 @@ open Types
                  create_roboplatform
                      i
                      (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~11.0))
-                     (BDDMath.vec2 (0.0, 0.0)) 1.0)
+                     (BDDMath.vec2 (0.0, 0.0))
+                     20.0)
   val rpboosterarray = 
       Array.tabulate (number_of_rps,
                       fn i =>
