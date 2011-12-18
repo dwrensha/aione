@@ -367,6 +367,10 @@ open Types
               if i = j
               then (* end recording *)
                   (mode := ControlDude;
+                   let val dt = Time.-(Time.now(), !recordingstart)
+                   in recordingevents :=
+                      (dt, BottomOff)::(dt, LeftOff)::(dt, RightOff):: (!recordingevents)
+                   end;
                    Array.update (scripts, i, {events = List.rev (!recordingevents),
                                               remaining = ref nil});
 
