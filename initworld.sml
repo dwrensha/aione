@@ -65,7 +65,7 @@ open Types
                            angle = 0.0,
                            linear_velocity = v,
                            angular_velocity = 0.0,
-                           linear_damping = 1.0,
+                           linear_damping = 0.0,
                            angular_damping = 0.0,
                            allow_sleep = false,
                            awake = true,
@@ -84,7 +84,7 @@ open Types
                              (uniq(), DudeFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
-          val () = B.Fixture.set_friction (fixture, 0.5)
+          val () = B.Fixture.set_friction (fixture, 0.1)
       in body end
 
   val dudebody =
@@ -141,7 +141,7 @@ open Types
                      i
                      (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~11.0))
                      (BDDMath.vec2 (0.0, 0.0))
-                     20.0)
+                     200.0)
   val rpboosterarray = 
       Array.tabulate (number_of_rps,
                       fn i =>
@@ -311,7 +311,7 @@ open Types
                              (uniq (), OtherFixture),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.0)
-          val () = B.Fixture.set_friction (fixture, 0.2)
+          val () = B.Fixture.set_friction (fixture, 0.4)
       in () end
 
 

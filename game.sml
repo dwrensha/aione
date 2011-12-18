@@ -133,27 +133,34 @@ struct
                val rpboosters = Array.sub (rpboosterarray, i)
                val {bottom, left, right} = rpboosters
                val () = if !bottom
-                        then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 600.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 6000.0), zero )
                         else ()
                val () = if !left
-                        then B.Body.apply_force (rp, BDDMath.vec2 (200.0, 0.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (2000.0, 0.0), zero )
                         else ()
                val () = if !right
-                        then B.Body.apply_force (rp, BDDMath.vec2 (~200.0, 0.0), zero )
+                        then B.Body.apply_force (rp, BDDMath.vec2 (~2000.0, 0.0), zero )
                         else ()
            in () end
                                 )
                         
           val {bottom, left, right} = dudeboosters
-          val () = if !bottom
-                   then B.Body.apply_force (dudebody, BDDMath.vec2 (0.0, 30.0), zero )
-                   else ()
-          val () = if !left
+          val v = B.Body.get_linear_velocity dudebody
+          val vx = BDDMath.vec2x v
+          val vy = BDDMath.vec2y v
+          val mag = BDDMath.vec2length (B.Body.get_linear_velocity dudebody)
+          val maxvx = 5.0
+          val () = if !left andalso vx > ~maxvx
                    then B.Body.apply_force (dudebody, BDDMath.vec2 (~5.0, 0.0), zero )
                    else ()
-          val () = if !right
+          val () = if !right andalso vx < maxvx
                    then B.Body.apply_force (dudebody, BDDMath.vec2 (5.0, 0.0), zero )
                    else ()
+
+          (* do damping by hand. *)
+          val () = B.Body.apply_force (dudebody,
+                                       BDDMath.vec2 (~3.0 * vx / maxvx, 0.0), zero )
+
       in () end
 
   val lasttime = ref (Time.now ())
@@ -295,7 +302,7 @@ struct
       (if canjump dudebody
        then B.Body.apply_linear_impulse
                 (dudebody,
-                 BDDMath.vec2 (0.0, 4.0),
+                 BDDMath.vec2 (0.0, 3.0),
                  zero)
        else ();
        SOME ())
