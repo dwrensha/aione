@@ -357,7 +357,8 @@ struct
     | keyUp _ s = SOME 1
 
 
-  fun handle_event (SDL.E_KeyDown {sym=k}) 1 = keyDown k (!mode)
+  fun handle_event SDL.E_Quit _ = NONE
+    | handle_event (SDL.E_KeyDown {sym=k}) 1 = keyDown k (!mode)
     | handle_event (SDL.E_KeyUp {sym=k}) 1 = keyUp k (!mode)
     | handle_event _ 1 = SOME 1
 
