@@ -1,4 +1,4 @@
-OUTPUT_APP=AIone
+OUTPUT_APP=RobotFriends
 ICON=media/graphics/dude.icns
 OUTPUT_EXE=game.exe
 MAKE=make
