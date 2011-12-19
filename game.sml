@@ -14,6 +14,7 @@ struct
    val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
    val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
    val victory = Graphics.requireimage "media/graphics/victory.png"
+   val background = Graphics.requireimage "media/graphics/background.png"
 
   open InitWorld
 
@@ -110,8 +111,10 @@ struct
 
           fun applyevents bst nil = nil
             | applyevents bst (lst as ((t, e)::es)) =
-              if (stillalive := true; Time.>(dt, t))
-              then (applyevent bst e; applyevents bst es)
+              if (stillalive := true; (Time.>(dt, t)))
+              then (
+                    applyevent bst e;
+                    applyevents bst es)
               else lst
                
       in
@@ -165,6 +168,7 @@ struct
       in () end
 
   val lasttime = ref (Time.now ())
+
 
   fun dophysics () = 
       let val now = Time.now ()
@@ -262,8 +266,9 @@ struct
 
   fun render screen 1 =
   (
-    SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
+(*    SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60)); *)
 
+    SDL.blitall (background, screen, 0, 0);
     SDL.blitall (exitdoor, screen, exitdoorx, exitdoory);
 
     doreplay (!playback);

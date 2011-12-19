@@ -139,7 +139,7 @@ open Types
               fn i =>
                  create_roboplatform
                      i
-                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~11.0))
+                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
                      (BDDMath.vec2 (0.0, 0.0))
                      200.0)
   val rpboosterarray = 
@@ -151,8 +151,9 @@ open Types
 
   val (scripts : scriptstate Array.array) =
       let open Time
-          val cutoff = fromReal 3.0
-          val es = [(zeroTime, BottomOn), (cutoff, BottomOff)]
+          val cutoff = fromReal 2.4
+          val es = [(zeroTime, BottomOn),
+                    (cutoff, BottomOff)]
       in
           Array.tabulate
               (number_of_rps,
@@ -376,6 +377,14 @@ open Types
 
                    copy_flip_boosters dudeboosters
                        (Array.sub (rpboosterarray, i));
+                   (if !(#left dudeboosters) andalso
+                       not (!(#right dudeboosters))
+                    then dudedir := Left
+                    else ());
+                   (if !(#right dudeboosters) andalso
+                       not (!(#left dudeboosters))
+                    then dudedir := Right
+                    else ());
                    (#bottom dudeboosters) := false;
                     turn_off_boosters (Array.sub (rpboosterarray, j))
                    )
@@ -391,8 +400,22 @@ open Types
                       (mode := ControlRoboPlatform i;
                        recordingstart := Time.now ();
                        recordingevents := nil;
+
+                       (if !(#right dudeboosters)
+                        then recordingevents :=
+                              ((Time.zeroTime, LeftOn) :: (!recordingevents))
+                        else ());
+
+                       (if !(#left dudeboosters)
+                        then recordingevents :=
+                             ((Time.zeroTime, RightOn) :: (!recordingevents))
+                        else ());
+
+
                        copy_flip_boosters
                            (Array.sub (rpboosterarray, i)) dudeboosters;
+
+
                        turn_off_boosters dudeboosters
                       )
                   else ()
@@ -403,10 +426,11 @@ open Types
 
             | plat_hits_dude _ _ (Playing _) = ()
               
-          fun dude_hits_play (Playing _) = ()
-            | dude_hits_play NotPlaying =
-              (startplaying ()
-              )
+
+            fun dude_hits_play ControlDude NotPlaying =
+                (startplaying ()
+                )
+              | dude_hits_play _ _ = ()
               
               
       in case (tpa, tpb) of
@@ -422,9 +446,9 @@ open Types
            | (_, RoboPlatformFixture i) => 
                 plat_hits_something i (!mode)
            | (PlayButtonFixture, DudeFixture) => 
-                dude_hits_play (!playback)
+                dude_hits_play (!mode) (!playback)
            | (DudeFixture, PlayButtonFixture) => 
-                dude_hits_play (!playback)
+                dude_hits_play (!mode) (!playback) 
            | _ => ()
 
       end 
