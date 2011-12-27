@@ -29,6 +29,11 @@ game: bin/sdlml.o bin/sdlmain.o
 	mlton $(MLTON_FLAGS) -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
 	$(MAKE) desktop
 
+.PHONY: cgame
+cgame: bin/sdlml.o bin/sdlmain.o
+	export MACOSX_DEPLOYMENT_TARGET=${VERSION_TARGET}
+	mlton $(MLTON_FLAGS) -codegen c -keep g -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
+
 .PHONY: examples/* examples/*/
 examples/*:
 	$(MAKE) $@/
