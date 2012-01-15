@@ -82,7 +82,7 @@ struct
           (xi, yi)
       end
 
-  val initstate = 1
+  val initstate = (Timing.init (); 1)
   
   fun initscreen screen =
   (
@@ -167,13 +167,8 @@ struct
 
       in () end
 
-  val lasttime = ref (Time.now ())
-
-
   fun dophysics () = 
-      let val now = Time.now ()
-          val diff = Time.-(now, !lasttime)
-          val () = lasttime := now
+      let val diff = Timing.tick ()
           val millis = IntInf.toString (Time.toMilliseconds (diff))
 
           val () = B.World.step (world, Time.toReal diff,
