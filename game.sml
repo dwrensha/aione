@@ -271,6 +271,9 @@ struct
     dophysics () ;
     drawbodies screen (B.World.get_body_list world);
     
+(* debugging *)
+    Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
+
     SDL.flip screen
   )
     | render screen 2 = 
