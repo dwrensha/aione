@@ -97,8 +97,8 @@ open Types
                           (p : BDDMath.vec2)
                           (v : BDDMath.vec2)
                           (mass : real) : B.body = 
-      let val pixel_width = 28
-          val pixel_height = 28
+      let val pixel_width = 80
+          val pixel_height = 16
           val meter_width = (Real.fromInt pixel_width) /
                             (Real.fromInt pixelsPerMeter)
           val meter_height = (Real.fromInt pixel_height) /
@@ -165,7 +165,7 @@ open Types
                      i
                      (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
                      (BDDMath.vec2 (0.0, 0.0))
-                     200.0)
+                     500.0)
   val rpboosterarray = 
       Array.tabulate (number_of_rps,
                       fn i =>
@@ -332,7 +332,7 @@ open Types
                             (body,
                              BDDShape.Polygon
                                  (BDDPolygon.box (meter_width / 2.0,
-                                                  0.2)),
+                                                  0.05)),
                              (uniq (), OtherFixture),
                              10000.0)
           val () = B.Fixture.set_restitution (fixture, 0.0)

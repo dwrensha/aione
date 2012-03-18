@@ -3,8 +3,9 @@ struct
   open Types
 
 
-   val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
-   val roboplatrecording = Graphics.requireimage "media/graphics/roboplatrecording.png"
+   val roboplat = Graphics.requireimage "media/graphics/roboplat0.png"
+   val roboplat0 = Graphics.requireimage "media/graphics/roboplat0.png"
+   val roboplatrecording = Graphics.requireimage "media/graphics/roboplat0.png"
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
    val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
    val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
@@ -219,20 +220,20 @@ struct
                              val () =
                                  if !bottom
                                  then SDL.blitall (bottombooster, screen,
-                                                   x - 3, y + 15)
+                                                   x - 3, y + 7)
                                  else ()
                              val () =
                                  if !left
                                  then SDL.blitall (leftbooster, screen,
-                                                   x - 24, y - 2)
+                                                   x - 49, y - 3)
                                  else ()
                              val () =
                                  if !right
                                  then SDL.blitall (rightbooster, screen,
-                                                   x + 15, y - 2)
+                                                   x + 40, y - 3)
                                  else ()
-                             val x1 = x - 17
-                             val y1 = y - 15
+                             val x1 = x - 40
+                             val y1 = y - 8
                              val () = SDL.blitall (sprite, screen, x1, y1)
                          in () end
                        | PlayButton =>
@@ -246,9 +247,9 @@ struct
                        | Dude (_, dir) =>
                          (case !dir of
                               Right => SDL.blitall (duderight, screen,
-                                                        x - 10, y - 15)
+                                                        x - 10, y - 17)
                             | Left => SDL.blitall (dudeleft, screen,
-                                                   x - 10, y - 15)
+                                                   x - 10, y - 17)
                          )
  
 
