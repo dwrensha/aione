@@ -32,8 +32,8 @@ open Types
 
 
   val gravity = BDDMath.vec2 (0.0, ~10.0) 
-  val world = B.World.world (gravity, true)
-  val () = B.World.set_auto_clear_forces (world,  true)
+  val world = ref (B.World.world (gravity, true))
+  val () = B.World.set_auto_clear_forces (!world,  true)
 
 
   local val counter = ref 0
@@ -77,7 +77,7 @@ open Types
           val meter_height = (Real.fromInt pixel_height) /
                              (Real.fromInt pixelsPerMeter)
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Dynamic,
                            position = p,
                            angle = 0.0,
@@ -107,7 +107,7 @@ open Types
 
   val dudebody =
       ref (create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3)
-  val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+
 
 
   fun create_roboplatform (i : int)
@@ -121,7 +121,7 @@ open Types
           val meter_height = (Real.fromInt pixel_height) /
                              (Real.fromInt pixelsPerMeter)
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Dynamic,
                            position = p,
                            angle = 0.0,
@@ -187,7 +187,7 @@ open Types
           val meter_height = (Real.fromInt pixel_height) /
                              (Real.fromInt pixelsPerMeter)
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
@@ -229,7 +229,7 @@ open Types
           val meter_height = (Real.fromInt pixel_height) /
                              (Real.fromInt pixelsPerMeter)
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Dynamic,
                            position = p,
                            angle = 0.0,
@@ -266,7 +266,7 @@ open Types
           val pixel_height =
                  Real.round (meter_height * (Real.fromInt pixelsPerMeter))
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
@@ -301,7 +301,7 @@ open Types
           val pixel_width =
                  Real.round (meter_width * (Real.fromInt pixelsPerMeter))
           val body = B.World.create_body
-                         (world,
+                         (!world,
                           {typ = B.Body.Static,
                            position = p,
                            angle = 0.0,
@@ -345,58 +345,6 @@ open Types
 
 
 
-  fun setuplevel i =
-    (case i of
-      1 => let val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
-               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
-               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
-               val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
-               val () = (exitdoorx := x)
-               val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (17.0, ~13.0))
-
-           in true end
-    | 2 => let val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
-               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
-               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
-               val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
-               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
-               val _ =
-                   Util.for 0 4 (fn i => 
-                          GrowArray.update rparray i 
-                           (create_roboplatform
-                            i
-                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
-                            (BDDMath.vec2 (0.0, 0.0))
-                            500.0))
-               val _ = 
-                   Util.for 0 4 (fn i => 
-                       GrowArray.update rpboosterarray i              
-                                        let val RoboPlatform bst
-                                              = B.Body.get_data
-                                                    (GrowArray.sub rparray i)
-                                        in bst end)
-               val _ = 
-                   let open Time
-                       val cutoff = fromReal 2.0
-                       val es = [(zeroTime, BottomOn),
-                                 (cutoff, BottomOff)]
-                   in Util.for 0 4 (fn i => 
-                           GrowArray.update scripts i {
-                               events = es,
-                               remaining = ref nil})
-                   end
-           in true end
-    | _ => false
-    )
-
-
-  val _ = setuplevel 1
-
   fun startplaying () =
       (playback := (Playing (Time.now ()));
        Util.for 0 ((GrowArray.length rparray) - 1) (fn i =>
@@ -417,6 +365,7 @@ open Types
           val (fa, fb) = get_fixtures c
           val (ida, tpa) = B.Fixture.get_data fa
           val (idb, tpb) = B.Fixture.get_data fb
+          val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
 
           fun plat_hits_something i ControlDude = ()
             | plat_hits_something i (ControlRoboPlatform j) = 
@@ -508,7 +457,72 @@ open Types
 
       end 
 
-  val () = B.World.set_begin_contact (world, contact_listener)
-      
+
+
+  fun setuplevel i =
+    (case i of
+      1 => let val () = 
+                   dudebody := 
+                    (create_dude (BDDMath.vec2 (~15.0, ~10.0))
+                                 (BDDMath.vec2 (0.0, 0.0)) 0.3)
+               val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
+               val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
+               val () = (exitdoorx := x)
+               val () = (exitdoory := y)
+               val _ = create_playbutton (BDDMath.vec2 (17.0, ~13.0))
+
+           in true end
+    | 2 => let val () = 
+                   dudebody := 
+                    (create_dude (BDDMath.vec2 (~15.0, 12.0))
+                                 (BDDMath.vec2 (0.0, 0.0)) 0.3)
+               val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
+               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
+               val _ =
+                   Util.for 0 4 (fn i => 
+                          GrowArray.update rparray i 
+                           (create_roboplatform
+                            i
+                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
+                            (BDDMath.vec2 (0.0, 0.0))
+                            500.0))
+               val _ = 
+                   Util.for 0 4 (fn i => 
+                       GrowArray.update rpboosterarray i              
+                                        let val RoboPlatform bst
+                                              = B.Body.get_data
+                                                    (GrowArray.sub rparray i)
+                                        in bst end)
+               val _ = 
+                   let open Time
+                       val cutoff = fromReal 2.0
+                       val es = [(zeroTime, BottomOn),
+                                 (cutoff, BottomOff)]
+                   in Util.for 0 4 (fn i => 
+                           GrowArray.update scripts i {
+                               events = es,
+                               remaining = ref nil})
+                   end
+           in true end
+    | _ => false
+    )
+
+  fun clearworld () = 
+     ( (world := (B.World.world (gravity, true)));
+       B.World.set_begin_contact (!world, contact_listener)
+     )
+
+  val _ = (clearworld(); setuplevel 1)
+
+
 
 end

@@ -60,7 +60,7 @@ struct
           val r = (BDDOps.oapp
                       B.Contact.get_next
                       checkcontact
-                      (B.World.get_contact_list world);
+                      (B.World.get_contact_list (!world));
                    false)
               handle CanJump => true
       in r
@@ -134,6 +134,7 @@ struct
            in () end
                                 )
                         
+          val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
           val {bottom, left, right} = dudeboosters
           val v = B.Body.get_linear_velocity (!dudebody)
           val vx = BDDMath.vec2x v
@@ -157,13 +158,13 @@ struct
       let val diff = Timing.tick ()
           val millis = IntInf.toString (Time.toMilliseconds (diff))
 
-          val () = B.World.step (world, Time.toReal diff,
+          val () = B.World.step (!world, Time.toReal diff,
                                  10, 10)
 
  (* For some reason, FLAG_CLEAR_FORCES gets reset to false
     whenever I create an object.
     TODO track this down. is it a bug?*)
-          val () = B.World.clear_forces world
+          val () = B.World.clear_forces (!world)
 
       in () end
       
@@ -255,7 +256,7 @@ struct
     doreplay (!playback);
     applyboosters ();
     dophysics () ;
-    drawbodies screen (B.World.get_body_list world);
+    drawbodies screen (B.World.get_body_list (!world));
     
 (* debugging *)
     Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
@@ -293,13 +294,18 @@ struct
        SOME 1)
 
     | keyDown (SDL.SDLK_RIGHT)  ControlDude =
-      ((#right dudeboosters) := true;
+      let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+      in ((#right dudeboosters) := true;
        dudedir := Right;
        SOME 1)
+      end
     | keyDown (SDL.SDLK_LEFT) ControlDude =
-      ((#left dudeboosters) := true;
-       dudedir := Left;
-       SOME 1)
+      let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+      in
+          ((#left dudeboosters) := true;
+           dudedir := Left;
+           SOME 1)
+      end
 
     | keyDown (SDL.SDLK_UP) ControlDude = 
       let val p = B.Body.get_position (!dudebody)
@@ -334,9 +340,15 @@ struct
        SOME 1)
 
     | keyUp (SDL.SDLK_RIGHT)  ControlDude =
+      let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+      in
       ((#right dudeboosters) := false; SOME 1)
+      end
     | keyUp (SDL.SDLK_LEFT) ControlDude =
+      let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+      in
       ((#left dudeboosters) := false; SOME 1)
+      end
 
     | keyUp _ s = SOME 1
 
