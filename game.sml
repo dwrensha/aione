@@ -67,21 +67,6 @@ struct
       end
 
 
-(*
-  The box2d world has as its origin the center of the screen.
-*)
-  fun worldToScreen (v : BDDMath.vec2) : int * int =
-      let open BDDMath
-          val (xw, yw) = (vec2x v, vec2y v)
-          open Real
-          val x = (fromInt pixelsPerMeter) *
-                  (xw + (meter_width / 2.0))
-          val y = (fromInt pixelsPerMeter) *
-                  (~yw + (meter_height / 2.0))
-          val (xi, yi) = (round x, round y)
-      in
-          (xi, yi)
-      end
 
   val initstate = (Timing.init (); 1)
   
@@ -119,11 +104,11 @@ struct
               else lst
                
       in
-          Util.for 0 (number_of_rps - 1) (fn i =>
-           let val rp = Array.sub (rparray, i)
-               val rpboosters = Array.sub (rpboosterarray, i)
+          Util.for 0 ((GrowArray.length rparray) - 1) (fn i =>
+           let val rp = GrowArray.sub rparray i
+               val rpboosters = GrowArray.sub rpboosterarray i
                val {bottom, left, right} = rpboosters
-               val {events, remaining} = Array.sub (scripts, i)
+               val {events, remaining} = GrowArray.sub scripts i
            in remaining := (applyevents rpboosters (!remaining))
            end);
           if not (!stillalive)
@@ -133,9 +118,9 @@ struct
 
 
   fun applyboosters () =
-      let val () = Util.for 0 (number_of_rps - 1) (fn i =>
-           let val rp = Array.sub (rparray, i)
-               val rpboosters = Array.sub (rpboosterarray, i)
+      let val () = Util.for 0 ((GrowArray.length rparray) - 1) (fn i =>
+           let val rp = GrowArray.sub rparray i
+               val rpboosters = GrowArray.sub rpboosterarray i
                val {bottom, left, right} = rpboosters
                val () = if !bottom
                         then B.Body.apply_force (rp, BDDMath.vec2 (0.0, 6000.0), zero )
@@ -150,20 +135,20 @@ struct
                                 )
                         
           val {bottom, left, right} = dudeboosters
-          val v = B.Body.get_linear_velocity dudebody
+          val v = B.Body.get_linear_velocity (!dudebody)
           val vx = BDDMath.vec2x v
           val vy = BDDMath.vec2y v
-          val mag = BDDMath.vec2length (B.Body.get_linear_velocity dudebody)
+          val mag = BDDMath.vec2length (B.Body.get_linear_velocity (!dudebody))
           val maxvx = 5.0
           val () = if !left andalso vx > ~maxvx
-                   then B.Body.apply_force (dudebody, BDDMath.vec2 (~5.0, 0.0), zero )
+                   then B.Body.apply_force (!dudebody, BDDMath.vec2 (~5.0, 0.0), zero )
                    else ()
           val () = if !right andalso vx < maxvx
-                   then B.Body.apply_force (dudebody, BDDMath.vec2 (5.0, 0.0), zero )
+                   then B.Body.apply_force (!dudebody, BDDMath.vec2 (5.0, 0.0), zero )
                    else ()
 
           (* do damping by hand. *)
-          val () = B.Body.apply_force (dudebody,
+          val () = B.Body.apply_force (!dudebody,
                                        BDDMath.vec2 (~3.0 * vx / maxvx, 0.0), zero )
 
       in () end
@@ -258,14 +243,14 @@ struct
           | NONE => ()
       )
 
-  val (exitdoorx, exitdoory) = worldToScreen (BDDMath.vec2 (14.7,12.5))
+
 
   fun render screen 1 =
   (
 (*    SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60)); *)
 
     SDL.blitall (background, screen, 0, 0);
-    SDL.blitall (exitdoor, screen, exitdoorx, exitdoory);
+    SDL.blitall (exitdoor, screen, (!exitdoorx) - 8 , (!exitdoory) - 15 );
 
     doreplay (!playback);
     applyboosters ();
@@ -295,15 +280,15 @@ struct
   fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
 
     | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
-      (#left (Array.sub (rpboosterarray, i) ) := true;
+      (#left (GrowArray.sub rpboosterarray i ) := true;
        recordEvent LeftOn;
        SOME 1)
     | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
-      (#right (Array.sub (rpboosterarray, i) ) := true;
+      (#right (GrowArray.sub rpboosterarray i ) := true;
        recordEvent RightOn;
        SOME 1)
     | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      (#bottom (Array.sub (rpboosterarray, i) ) := true;
+      (#bottom (GrowArray.sub rpboosterarray i ) := true;
        recordEvent BottomOn;
        SOME 1)
 
@@ -317,15 +302,15 @@ struct
        SOME 1)
 
     | keyDown (SDL.SDLK_UP) ControlDude = 
-      let val p = B.Body.get_position dudebody
+      let val p = B.Body.get_position (!dudebody)
           val (x, y) = worldToScreen p
-      in if abs (x - exitdoorx) < 15 andalso
-            abs (y - exitdoory) < 15
+      in if abs (x - (!exitdoorx)) < 15 andalso
+            abs (y - (!exitdoory)) < 15
          then SOME 2 (* you win *)
          else
-             (if canjump dudebody
+             (if canjump (!dudebody)
               then B.Body.apply_linear_impulse
-                       (dudebody,
+                       (!dudebody,
                         BDDMath.vec2 (0.0, 3.0),
                         zero)
               else ();
@@ -336,15 +321,15 @@ struct
   fun keyUp (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
 
     | keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
-      (#left (Array.sub (rpboosterarray, i) ) := false;
+      (#left (GrowArray.sub rpboosterarray i ) := false;
        recordEvent LeftOff;
        SOME 1)
     | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
-      (#right (Array.sub (rpboosterarray, i) ) := false;
+      (#right (GrowArray.sub rpboosterarray i ) := false;
        recordEvent RightOff;
        SOME 1)
     | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
-      (#bottom (Array.sub (rpboosterarray, i) ) := false;
+      (#bottom (GrowArray.sub rpboosterarray i ) := false;
        recordEvent BottomOff;
        SOME 1)
 

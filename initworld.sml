@@ -13,6 +13,23 @@ open Types
   val meter_width = (Real.fromInt width /
                      Real.fromInt pixelsPerMeter)
 
+(*
+  The box2d world has as its origin the center of the screen.
+*)
+  fun worldToScreen (v : BDDMath.vec2) : int * int =
+      let open BDDMath
+          val (xw, yw) = (vec2x v, vec2y v)
+          open Real
+          val x = (fromInt pixelsPerMeter) *
+                  (xw + (meter_width / 2.0))
+          val y = (fromInt pixelsPerMeter) *
+                  (~yw + (meter_height / 2.0))
+          val (xi, yi) = (round x, round y)
+      in
+          (xi, yi)
+      end
+
+
 
   val gravity = BDDMath.vec2 (0.0, ~10.0) 
   val world = B.World.world (gravity, true)
@@ -23,6 +40,7 @@ open Types
   in fun uniq () = (counter:= !counter + 1; !counter)
   end
 
+  val (exitdoorx, exitdoory) = (ref 0, ref 0)
 
   val (recording : (int option) ref) = ref NONE
   val (mode : controlmode ref) = ref ControlDude
@@ -88,9 +106,8 @@ open Types
       in body end
 
   val dudebody =
-      create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3
-  val Dude (dudeboosters, dudedir) = B.Body.get_data dudebody
-
+      ref (create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3)
+  val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
 
 
   fun create_roboplatform (i : int)
@@ -154,37 +171,11 @@ open Types
 
   (* We need a way to have multiple levels.  *)
 
-  val number_of_rps = 5
+  val rparray = GrowArray.empty ()
+  val rpboosterarray = GrowArray.empty ()
 
-  (* This should be a vector. (or growarray) *)
+  val (scripts : scriptstate GrowArray.growarray) = GrowArray.empty ()
 
-  val rparray = Array.tabulate
-                (number_of_rps,
-              fn i =>
-                 create_roboplatform
-                     i
-                     (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
-                     (BDDMath.vec2 (0.0, 0.0))
-                     500.0)
-  val rpboosterarray = 
-      Array.tabulate (number_of_rps,
-                      fn i =>
-                         let val RoboPlatform bst
-                                 = B.Body.get_data (Array.sub (rparray, i))
-                         in bst end)
-
-  val (scripts : scriptstate Array.array) =
-      let open Time
-          val cutoff = fromReal 2.4
-          val es = [(zeroTime, BottomOn),
-                    (cutoff, BottomOff)]
-      in
-          Array.tabulate
-              (number_of_rps,
-            fn i => {
-                     events = es,
-                     remaining = ref nil})
-      end
 
 
   fun create_playbutton
@@ -224,7 +215,7 @@ open Types
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
-  val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
+
 
   fun create_text_body (text : string)
                        (p : BDDMath.vec2)
@@ -267,7 +258,6 @@ open Types
           val () = B.Fixture.set_restitution (fixture, 1.0)
           val () = B.Fixture.set_friction (fixture, 0.0)
       in () end
-
 
 
   fun create_wall (p : BDDMath.vec2)
@@ -354,25 +344,66 @@ open Types
       in BDDMath.vec2 (x, y) end
 
 
-  val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
 
-  val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+  fun setuplevel i =
+    (case i of
+      1 => let val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
+               val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
+               val () = (exitdoorx := x)
+               val () = (exitdoory := y)
+               val _ = create_playbutton (BDDMath.vec2 (17.0, ~13.0))
 
-  val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+           in true end
+    | 2 => let val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
+               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
+               val _ =
+                   Util.for 0 4 (fn i => 
+                          GrowArray.update rparray i 
+                           (create_roboplatform
+                            i
+                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
+                            (BDDMath.vec2 (0.0, 0.0))
+                            500.0))
+               val _ = 
+                   Util.for 0 4 (fn i => 
+                       GrowArray.update rpboosterarray i              
+                                        let val RoboPlatform bst
+                                              = B.Body.get_data
+                                                    (GrowArray.sub rparray i)
+                                        in bst end)
+               val _ = 
+                   let open Time
+                       val cutoff = fromReal 2.0
+                       val es = [(zeroTime, BottomOn),
+                                 (cutoff, BottomOff)]
+                   in Util.for 0 4 (fn i => 
+                           GrowArray.update scripts i {
+                               events = es,
+                               remaining = ref nil})
+                   end
+           in true end
+    | _ => false
+    )
 
-  val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
-  val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
-
-  val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
+  val _ = setuplevel 1
 
   fun startplaying () =
       (playback := (Playing (Time.now ()));
-       Util.for 0 (number_of_rps - 1) (fn i =>
-           let val rp = Array.sub (rparray, i)
-               val rpboosters = Array.sub (rpboosterarray, i)
+       Util.for 0 ((GrowArray.length rparray) - 1) (fn i =>
+           let val rp = GrowArray.sub rparray i
+               val rpboosters = GrowArray.sub rpboosterarray i
                val {bottom, left, right} = rpboosters
-               val {events, remaining} = Array.sub (scripts, i)
+               val {events, remaining} = GrowArray.sub scripts i
            in remaining := events
            end)
       )
@@ -396,11 +427,11 @@ open Types
                    in recordingevents :=
                       (dt, BottomOff)::(dt, LeftOff)::(dt, RightOff):: (!recordingevents)
                    end;
-                   Array.update (scripts, i, {events = List.rev (!recordingevents),
-                                              remaining = ref nil});
+                   GrowArray.update scripts i {events = List.rev (!recordingevents),
+                                               remaining = ref nil};
 
                    copy_flip_boosters dudeboosters
-                       (Array.sub (rpboosterarray, i));
+                       (GrowArray.sub rpboosterarray i);
                    (if !(#left dudeboosters) andalso
                        not (!(#right dudeboosters))
                     then dudedir := Left
@@ -410,13 +441,13 @@ open Types
                     then dudedir := Right
                     else ());
                    (#bottom dudeboosters) := false;
-                    turn_off_boosters (Array.sub (rpboosterarray, j))
+                    turn_off_boosters (GrowArray.sub rpboosterarray j)
                    )
               else ()
 
           fun plat_hits_dude i ControlDude NotPlaying = 
-              let val dp = B.Body.get_position dudebody
-                  val pp = B.Body.get_position (Array.sub (rparray, i))
+              let val dp = B.Body.get_position (!dudebody)
+                  val pp = B.Body.get_position (GrowArray.sub rparray i)
                   val d = BDDMath.vec2sub (pp, dp)
               in
                   if BDDMath.vec2y d > ~0.5
@@ -437,7 +468,7 @@ open Types
 
 
                        copy_flip_boosters
-                           (Array.sub (rpboosterarray, i)) dudeboosters;
+                           (GrowArray.sub rpboosterarray i) dudeboosters;
 
 
                        turn_off_boosters dudeboosters
