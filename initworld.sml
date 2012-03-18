@@ -469,12 +469,31 @@ open Types
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
                val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 6.0
+               val () = create_ceiling (BDDMath.vec2 (~5.0, 11.0)) 26.0
                val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (17.0, ~13.0))
-
+               val _ = create_playbutton (BDDMath.vec2 (7.0, ~13.0))
+               val () = GrowArray.update rparray 0 
+                         (create_roboplatform 0
+                            (BDDMath.vec2 (10.0, ~12.5))
+                            zero
+                            500.0)
+               val () = GrowArray.update rpboosterarray 0
+                                        let val RoboPlatform bst
+                                              = B.Body.get_data
+                                                    (GrowArray.sub rparray 0)
+                                        in bst end
+               val _ = 
+                   let open Time
+                       val cutoff = fromReal 2.0
+                       val es = [(zeroTime, BottomOn),
+                                 (cutoff, BottomOff)]
+                   in  GrowArray.update scripts 0 {
+                               events = es,
+                               remaining = ref nil}
+                   end
            in true end
     | 2 => let val () = 
                    dudebody := 

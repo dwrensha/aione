@@ -21,6 +21,7 @@ struct
 
   exception CanJump
 
+
   fun canjump b = 
       let val p = B.Body.get_position b
           val SOME fixture = B.Body.get_fixtures b
@@ -246,8 +247,17 @@ struct
 
 
 
-  fun render screen 1 =
-  (
+  fun  render screen (~1) =  (* ~1 means you win *)
+      (
+       SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
+       
+       SDL.blitall (victory, screen, 26, 29);
+       Font.Huge.draw (screen, 100, 290, "you win");
+       SDL.flip screen
+      )
+
+  | render screen _ =
+  ( (* the usual render function *)
 (*    SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60)); *)
 
     SDL.blitall (background, screen, 0, 0);
@@ -263,14 +273,7 @@ struct
 
     SDL.flip screen
   )
-    | render screen 2 = 
-      (
-       SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
-       
-       SDL.blitall (victory, screen, 26, 29);
-       Font.Huge.draw (screen, 100, 290, "you win");
-       SDL.flip screen
-      )
+
 
   fun recordEvent e = 
       let val dt = Time.-(Time.now (), !recordingstart)
@@ -278,41 +281,46 @@ struct
       recordingevents := ( (dt, e) :: (!recordingevents))
       end
 
-  fun keyDown (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
+  fun keyDown (SDL.SDLK_ESCAPE) _ _ = NONE (* quit the game *)
 
-    | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) =
+    | keyDown (SDL.SDLK_RIGHT)  (ControlRoboPlatform i) level =
       (#left (GrowArray.sub rpboosterarray i ) := true;
        recordEvent LeftOn;
-       SOME 1)
-    | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) =
+       SOME level)
+    | keyDown (SDL.SDLK_LEFT) (ControlRoboPlatform i) level =
       (#right (GrowArray.sub rpboosterarray i ) := true;
        recordEvent RightOn;
-       SOME 1)
-    | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
+       SOME level)
+    | keyDown (SDL.SDLK_UP)  (ControlRoboPlatform i) level = 
       (#bottom (GrowArray.sub rpboosterarray i ) := true;
        recordEvent BottomOn;
-       SOME 1)
+       SOME level)
 
-    | keyDown (SDL.SDLK_RIGHT)  ControlDude =
+    | keyDown (SDL.SDLK_RIGHT)  ControlDude level =
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in ((#right dudeboosters) := true;
        dudedir := Right;
-       SOME 1)
+       SOME level)
       end
-    | keyDown (SDL.SDLK_LEFT) ControlDude =
+    | keyDown (SDL.SDLK_LEFT) ControlDude level =
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in
           ((#left dudeboosters) := true;
            dudedir := Left;
-           SOME 1)
+           SOME level)
       end
 
-    | keyDown (SDL.SDLK_UP) ControlDude = 
+    | keyDown (SDL.SDLK_UP) ControlDude level = 
       let val p = B.Body.get_position (!dudebody)
           val (x, y) = worldToScreen p
       in if abs (x - (!exitdoorx)) < 15 andalso
             abs (y - (!exitdoory)) < 15
-         then SOME 2 (* you win *)
+         then ( (* go to next level *)
+             clearworld();
+             if setuplevel (level + 1)
+             then SOME (level + 1)
+             else SOME (~1)
+             )
          else
              (if canjump (!dudebody)
               then B.Body.apply_linear_impulse
@@ -320,47 +328,48 @@ struct
                         BDDMath.vec2 (0.0, 3.0),
                         zero)
               else ();
-              SOME 1)
+              SOME level)
       end
-    | keyDown _ s = SOME 1
+    | keyDown _ m level = SOME level
 
-  fun keyUp (SDL.SDLK_ESCAPE) _ = NONE (* quit the game *)
+  fun keyUp (SDL.SDLK_ESCAPE) _ _ = NONE (* quit the game *)
 
-    | keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) =
+    | keyUp (SDL.SDLK_RIGHT) (ControlRoboPlatform i) level =
       (#left (GrowArray.sub rpboosterarray i ) := false;
        recordEvent LeftOff;
-       SOME 1)
-    | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) =
+       SOME level)
+    | keyUp (SDL.SDLK_LEFT)  ((ControlRoboPlatform i)) level =
       (#right (GrowArray.sub rpboosterarray i ) := false;
        recordEvent RightOff;
-       SOME 1)
-    | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) = 
+       SOME level)
+    | keyUp (SDL.SDLK_UP)  (ControlRoboPlatform i) level =
       (#bottom (GrowArray.sub rpboosterarray i ) := false;
        recordEvent BottomOff;
-       SOME 1)
+       SOME level)
 
-    | keyUp (SDL.SDLK_RIGHT)  ControlDude =
+    | keyUp (SDL.SDLK_RIGHT)  ControlDude level =
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in
-      ((#right dudeboosters) := false; SOME 1)
+      ((#right dudeboosters) := false; SOME level)
       end
-    | keyUp (SDL.SDLK_LEFT) ControlDude =
+    | keyUp (SDL.SDLK_LEFT) ControlDude level =
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in
-      ((#left dudeboosters) := false; SOME 1)
+      ((#left dudeboosters) := false; SOME level)
       end
 
-    | keyUp _ s = SOME 1
+    | keyUp _ s level = SOME level
 
 
   fun handle_event SDL.E_Quit _ = NONE
-    | handle_event (SDL.E_KeyDown {sym=k}) 1 = keyDown k (!mode)
-    | handle_event (SDL.E_KeyUp {sym=k}) 1 = keyUp k (!mode)
-    | handle_event _ 1 = SOME 1
 
-    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_SPACE}) 2 = NONE
-    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_ESCAPE}) 2 = NONE
-    | handle_event _ s = SOME s
+    (* ~1 means you win *)
+    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_SPACE}) (~1) = NONE
+    | handle_event (SDL.E_KeyDown {sym=SDL.SDLK_ESCAPE}) (~1) = NONE
+
+    | handle_event (SDL.E_KeyDown {sym=k}) level = keyDown k (!mode) level
+    | handle_event (SDL.E_KeyUp {sym=k}) level = keyUp k (!mode) level
+    | handle_event _ level = SOME level
 
 
   fun tick s = SOME s
