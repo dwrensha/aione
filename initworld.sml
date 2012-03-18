@@ -128,11 +128,35 @@ open Types
                                                   meter_height / 2.0)),
                              (uniq (), RoboPlatformFixture i),
                              density)
+(*          val rightfixture = B.Body.create_fixture_default
+                              (body,
+                               BDDShape.Polygon
+                                   (BDDPolygon.rotated_box
+                                        (0.05,
+                                         meter_height / 1.9,
+                                         BDDMath.vec2 (meter_width / 2.0, 0.0),
+                                         0.0)),
+                               (uniq (), RoboPlatformFixture i),
+                               0.0)
+          val leftfixture = B.Body.create_fixture_default
+                              (body,
+                               BDDShape.Polygon
+                                   (BDDPolygon.rotated_box
+                                        (0.05,
+                                         meter_height / 1.9,
+                                         BDDMath.vec2 (~ meter_width / 2.0, 0.0),
+                                         0.0)),
+                               (uniq (), RoboPlatformFixture i),
+                               0.0) *)
           val () = B.Fixture.set_restitution (fixture, 0.05)
           val () = B.Fixture.set_friction (fixture, 0.5)
       in body end
 
+  (* We need a way to have multiple levels.  *)
+
   val number_of_rps = 5
+
+  (* This should be a vector. (or growarray) *)
 
   val rparray = Array.tabulate
                 (number_of_rps,
