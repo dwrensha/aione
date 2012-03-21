@@ -3,9 +3,8 @@ struct
   open Types
 
 
-   val roboplat = Graphics.requireimage "media/graphics/roboplat0.png"
-   val roboplat0 = Graphics.requireimage "media/graphics/roboplat0.png"
-   val roboplatrecording = Graphics.requireimage "media/graphics/roboplat0.png"
+   val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
+   val roboplatrecording = Graphics.requireimage "media/graphics/roboplatrecording.png"
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
    val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
    val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
