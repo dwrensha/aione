@@ -245,8 +245,10 @@ struct
       )
 
 
+  val inputstring = ref ""
+  val cheating = ref false
 
-  fun  render screen (~1) =  (* ~1 means you win *)
+  fun render screen (~1) =  (* ~1 means you win *)
       (
        SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
        
@@ -269,6 +271,8 @@ struct
     
 (* debugging *)
     Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
+    Font.Normal.draw (screen, 0, 20, "input string: " ^ (!inputstring));
+    if !cheating then Font.Normal.draw (screen, 0, 40, "CHEATING") else ();
 
     SDL.flip screen
   )
@@ -318,12 +322,8 @@ struct
           val (x, y) = worldToScreen p
       in if abs (x - (!exitdoorx)) < 15 andalso
             abs (y - (!exitdoory)) < 15
-         then ( (* go to next level *)
-             clearworld();
-             if setuplevel (level + 1)
-             then SOME (level + 1)
-             else SOME (~1)
-             )
+         then (* go to next level *) 
+             gotolevel (level + 1)
          else
              (if canjump (!dudebody)
               then B.Body.apply_linear_impulse
@@ -333,7 +333,25 @@ struct
               else ();
               SOME level)
       end
-    | keyDown _ m level = SOME level
+
+    | keyDown SDL.SDLK_RETURN m level = 
+      let val newlevel = 
+               (case !inputstring of
+                    "cheat" => ((cheating := true); level)
+                  | "2" => (gotolevel 2; 2)
+                  | _ => level
+               )
+      in
+       inputstring := "";
+       SOME newlevel
+      end
+    | keyDown k m level = 
+      (inputstring := ((!inputstring) ^ (SDL.sdlktos k));
+       if String.size (!inputstring) > 40
+       then inputstring := ""
+       else ();
+       SOME level
+      )
 
   fun keyUp (SDL.SDLK_ESCAPE) _ _ = NONE (* quit the game *)
 

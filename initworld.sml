@@ -547,6 +547,13 @@ open Types
        B.World.set_begin_contact (!world, contact_listener)
      )
 
+  fun gotolevel level =
+      (clearworld();
+       if setuplevel (level)
+       then SOME (level)
+       else SOME (~1)
+      )
+
   val _ = (clearworld(); setuplevel 1)
 
 
