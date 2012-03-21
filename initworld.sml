@@ -463,7 +463,7 @@ open Types
     (case i of
       1 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, ~10.0))
+                    (create_dude (BDDMath.vec2 (~15.0, ~13.0))
                                  (BDDMath.vec2 (0.0, 0.0)) 0.3)
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
@@ -474,10 +474,10 @@ open Types
                val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (7.0, ~13.0))
+               val _ = create_playbutton (BDDMath.vec2 (6.5, ~12.75))
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
-                            (BDDMath.vec2 (10.0, ~12.5))
+                            (BDDMath.vec2 (10.0, ~13.25))
                             zero
                             500.0)
                val () = GrowArray.update rpboosterarray 0
@@ -487,8 +487,9 @@ open Types
                                         in bst end
                val _ = 
                    let open Time
-                       val cutoff = fromReal 2.0
-                       val es = [(zeroTime, BottomOn),
+                       val start = fromReal 0.25
+                       val cutoff = fromReal 2.25
+                       val es = [(start, BottomOn),
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {
                                events = es,
@@ -511,7 +512,7 @@ open Types
                           GrowArray.update rparray i 
                            (create_roboplatform
                             i
-                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~12.5))
+                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~13.25))
                             (BDDMath.vec2 (0.0, 0.0))
                             500.0))
                val _ = 
