@@ -356,7 +356,31 @@ open Types
            end)
       )
 
-
+  fun stoprecording i = 
+      let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
+      in
+      (mode := ControlDude;
+       let val dt = Time.-(Time.now(), !recordingstart)
+       in recordingevents :=
+          (dt, BottomOff)::(dt, LeftOff)::(dt, RightOff):: (!recordingevents)
+       end;
+       GrowArray.update scripts i {events = List.rev (!recordingevents),
+                                   remaining = ref nil};
+       
+       copy_flip_boosters dudeboosters
+                          (GrowArray.sub rpboosterarray i);
+       (if !(#left dudeboosters) andalso
+           not (!(#right dudeboosters))
+        then dudedir := Left
+        else ());
+       (if !(#right dudeboosters) andalso
+           not (!(#left dudeboosters))
+        then dudedir := Right
+        else ());
+       (#bottom dudeboosters) := false;
+       turn_off_boosters (GrowArray.sub rpboosterarray i)
+      )
+      end
 
 (* If dude and roboplat collide, start controlling the roboplat.
    If roboplat collides with anything else, stop recording. *)
@@ -370,28 +394,7 @@ open Types
           fun plat_hits_something i ControlDude = ()
             | plat_hits_something i (ControlRoboPlatform j) = 
               if i = j
-              then (* end recording *)
-                  (mode := ControlDude;
-                   let val dt = Time.-(Time.now(), !recordingstart)
-                   in recordingevents :=
-                      (dt, BottomOff)::(dt, LeftOff)::(dt, RightOff):: (!recordingevents)
-                   end;
-                   GrowArray.update scripts i {events = List.rev (!recordingevents),
-                                               remaining = ref nil};
-
-                   copy_flip_boosters dudeboosters
-                       (GrowArray.sub rpboosterarray i);
-                   (if !(#left dudeboosters) andalso
-                       not (!(#right dudeboosters))
-                    then dudedir := Left
-                    else ());
-                   (if !(#right dudeboosters) andalso
-                       not (!(#left dudeboosters))
-                    then dudedir := Right
-                    else ());
-                   (#bottom dudeboosters) := false;
-                    turn_off_boosters (GrowArray.sub rpboosterarray j)
-                   )
+              then stoprecording i
               else ()
 
           fun plat_hits_dude i ControlDude NotPlaying = 

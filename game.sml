@@ -295,6 +295,10 @@ struct
        recordEvent BottomOn;
        SOME level)
 
+    | keyDown (SDL.SDLK_DOWN)  (ControlRoboPlatform i) level = 
+      (stoprecording i;
+       SOME level)
+
     | keyDown (SDL.SDLK_RIGHT)  ControlDude level =
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in ((#right dudeboosters) := true;
