@@ -466,7 +466,7 @@ open Types
     (case i of
       1 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, ~13.0))
+                    (create_dude (BDDMath.vec2 (~15.0, ~13.4))
                                  (BDDMath.vec2 (0.0, 0.0)) 0.3)
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
@@ -480,7 +480,7 @@ open Types
                val _ = create_playbutton (BDDMath.vec2 (6.5, ~12.75))
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
-                            (BDDMath.vec2 (10.0, ~13.25))
+                            (BDDMath.vec2 (10.0, ~13.5))
                             zero
                             500.0)
                val () = GrowArray.update rpboosterarray 0
@@ -501,7 +501,7 @@ open Types
            in true end
     | 2 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, 12.0))
+                    (create_dude (BDDMath.vec2 (~15.0, 11.6))
                                  (BDDMath.vec2 (0.0, 0.0)) 0.3)
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
@@ -518,7 +518,7 @@ open Types
                           GrowArray.update rparray i 
                            (create_roboplatform
                             i
-                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~13.25))
+                            (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~13.5))
                             (BDDMath.vec2 (0.0, 0.0))
                             500.0))
                val _ = 

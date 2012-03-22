@@ -337,13 +337,15 @@ struct
     | keyDown SDL.SDLK_RETURN m level = 
       let val newlevel = 
                (case !inputstring of
-                    "cheat" => ((cheating := true); level)
-                  | "2" => (gotolevel 2; 2)
-                  | _ => level
+                    "cheat" => ((cheating := true); SOME level)
+                  | mbe_num => 
+                    (case Int.fromString mbe_num of
+                         SOME lev => gotolevel lev
+                       | NONE => SOME level)
                )
       in
        inputstring := "";
-       SOME newlevel
+       newlevel
       end
     | keyDown k m level = 
       (inputstring := ((!inputstring) ^ (SDL.sdlktos k));
