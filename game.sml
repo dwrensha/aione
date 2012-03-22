@@ -148,16 +148,13 @@ struct
                    then B.Body.apply_force (!dudebody, BDDMath.vec2 (5.0, 0.0), zero )
                    else ()
 
-          (* do damping by hand. *)
-          val () = B.Body.apply_force (!dudebody,
-                                       BDDMath.vec2 (~3.0 * vx / maxvx, 0.0), zero )
-
       in () end
 
   fun dophysics () = 
       let val diff = Timing.tick ()
           val millis = IntInf.toString (Time.toMilliseconds (diff))
-
+          
+          (* val timestep = 1.0 / 60.0 *)
           val () = B.World.step (!world, Time.toReal diff,
                                  10, 10)
 

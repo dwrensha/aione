@@ -102,7 +102,7 @@ open Types
                              (uniq(), DudeFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
-          val () = B.Fixture.set_friction (fixture, 0.1)
+          val () = B.Fixture.set_friction (fixture, 0.4)
       in body end
 
   val dudebody =
