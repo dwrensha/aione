@@ -8,8 +8,14 @@ struct
    val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
    val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
    val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
-   val duderight = Graphics.requireimage "media/graphics/duderight.png"
-   val dudeleft = Graphics.requireimage "media/graphics/dudeleft.png"
+   val dude1right = Graphics.requireimage "media/graphics/dude1right.png"
+   val dude2right = Graphics.requireimage "media/graphics/dude2right.png"
+   val dude3right = Graphics.requireimage "media/graphics/dude3right.png"
+   val duderight = dude1right
+   val dude1left = Graphics.requireimage "media/graphics/dude1left.png"
+   val dude2left = Graphics.requireimage "media/graphics/dude2left.png"
+   val dude3left = Graphics.requireimage "media/graphics/dude3left.png"
+   val dudeleft = dude1left
    val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
    val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
    val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
