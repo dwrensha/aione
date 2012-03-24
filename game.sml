@@ -11,16 +11,47 @@ struct
    val dude1right = Graphics.requireimage "media/graphics/dude1right.png"
    val dude2right = Graphics.requireimage "media/graphics/dude2right.png"
    val dude3right = Graphics.requireimage "media/graphics/dude3right.png"
-   val duderight = dude1right
    val dude1left = Graphics.requireimage "media/graphics/dude1left.png"
    val dude2left = Graphics.requireimage "media/graphics/dude2left.png"
    val dude3left = Graphics.requireimage "media/graphics/dude3left.png"
-   val dudeleft = dude1left
    val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
    val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
    val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
    val victory = Graphics.requireimage "media/graphics/victory.png"
    val background = Graphics.requireimage "media/graphics/background.png"
+
+
+
+  val (dudeleft, duderight, walk) = 
+      let val frames_per_step = 5
+          val counter = ref 0
+          fun duderight () =
+              (case (!counter) div  frames_per_step of
+                 0 => dude1right
+               | 1  => dude2right
+               | 2  => dude3right
+               | 3  => dude2right
+               | _ => raise Fail "Impossible"
+              )
+          fun dudeleft () =
+              (case (!counter) div  frames_per_step of
+                 0 => dude1left
+               | 1  => dude2left
+               | 2  => dude3left
+               | 3  => dude2left
+               | _ => raise Fail "Impossible"
+              )
+          fun walk () =
+              (counter := (!counter + 1);
+               if (!counter) >= frames_per_step * 4 
+               then counter := 0
+               else () )
+      in 
+        (dudeleft, duderight, walk)
+      end
+
+
+
 
   open InitWorld
 
@@ -154,6 +185,9 @@ struct
                    then B.Body.apply_force (!dudebody, BDDMath.vec2 (5.0, 0.0), zero )
                    else ()
 
+          (* get the sprites to animate *)
+          val () = if !left orelse !right then walk () else ()
+
       in () end
 
   fun dophysics () = 
@@ -235,9 +269,9 @@ struct
                          )
                        | Dude (_, dir) =>
                          (case !dir of
-                              Right => SDL.blitall (duderight, screen,
+                              Right => SDL.blitall (duderight (), screen,
                                                         x - 10, y - 17)
-                            | Left => SDL.blitall (dudeleft, screen,
+                            | Left => SDL.blitall (dudeleft (), screen,
                                                    x - 10, y - 17)
                          )
  
