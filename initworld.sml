@@ -31,7 +31,7 @@ open Types
 
 
 
-  val gravity = BDDMath.vec2 (0.0, ~10.0) 
+  val gravity = BDDMath.vec2 (0.0, ~15.0) 
   val world = ref (B.World.world (gravity, true))
   val () = B.World.set_auto_clear_forces (!world,  true)
 
@@ -477,7 +477,7 @@ open Types
                val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 6.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (6.5, ~12.75))
+               val _ = create_playbutton (BDDMath.vec2 (6.5, ~13.25))
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))

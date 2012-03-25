@@ -23,7 +23,7 @@ struct
 
 
   val (dudeleft, duderight, walk) = 
-      let val frames_per_step = 6
+      let val frames_per_step = 10
           val counter = ref 0
           fun duderight () =
               (case (!counter) div  frames_per_step of
@@ -190,12 +190,15 @@ struct
 
       in () end
 
+  val seconds_per_tick = 0.01
+
   fun dophysics () = 
       let val diff = Timing.tick ()
-          val millis = IntInf.toString (Time.toMilliseconds (diff))
+          (* val millis = IntInf.toString (Time.toMilliseconds (diff)) *)
           
-          (* val timestep = 1.0 / 60.0 *)
-          val () = B.World.step (!world, Time.toReal diff,
+          (* val timestep = Time.toReal diff *)
+          val timestep = seconds_per_tick
+          val () = B.World.step (!world, timestep,
                                  10, 10)
 
  (* For some reason, FLAG_CLEAR_FORCES gets reset to false
@@ -301,9 +304,6 @@ struct
     SDL.blitall (background, screen, 0, 0);
     SDL.blitall (exitdoor, screen, (!exitdoorx) - 8 , (!exitdoory) - 15 );
 
-    doreplay (!playback);
-    applyboosters ();
-    dophysics () ;
     drawbodies screen (B.World.get_body_list (!world));
     
 (* debugging *)
@@ -432,7 +432,14 @@ struct
     | handle_event _ level = SOME level
 
 
-  fun tick s = SOME s
+  fun tick (~1) = SOME (~1)
+    | tick s = 
+      (doreplay (!playback);
+       applyboosters ();
+       dophysics ();
+       SOME s
+      )
+      
 end
 
 structure Main =
