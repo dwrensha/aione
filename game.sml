@@ -193,7 +193,7 @@ struct
   val seconds_per_tick = 0.01
 
   fun dophysics () = 
-      let val diff = Timing.tick ()
+      let 
           (* val millis = IntInf.toString (Time.toMilliseconds (diff)) *)
           
           (* val timestep = Time.toReal diff *)
@@ -307,6 +307,7 @@ struct
     drawbodies screen (B.World.get_body_list (!world));
     
 (* debugging *)
+    Timing.tick(); 
     Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
     Font.Normal.draw (screen, 0, 20, "input string: " ^ (!inputstring));
     if !cheating then Font.Normal.draw (screen, 0, 40, "CHEATING") else ();
