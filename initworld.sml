@@ -70,9 +70,9 @@ open Types
 
 
   fun create_dude (p : BDDMath.vec2)
-                  (v : BDDMath.vec2)
-                  (mass : real) : B.body = 
-      let val pixel_width = 8
+                  (v : BDDMath.vec2) : B.body = 
+      let val mass = 0.1
+          val pixel_width = 8
           val pixel_height = 26
           val meter_width = (Real.fromInt pixel_width) /
                             (Real.fromInt pixelsPerMeter)
@@ -95,7 +95,7 @@ open Types
                            data = Dude (new_boosters(), ref Right),
                            inertia_scale = 1.0
                          })
-          val density = mass / meter_width * meter_height
+          val density = mass / (meter_width * meter_height)
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
@@ -104,19 +104,19 @@ open Types
                              (uniq(), DudeFixture),
                              density)
           val () = B.Fixture.set_restitution (fixture, 0.00)
-          val () = B.Fixture.set_friction (fixture, 0.4)
+          val () = B.Fixture.set_friction (fixture, 0.7)
       in body end
 
   val dudebody =
-      ref (create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)) 0.3)
+      ref (create_dude (BDDMath.vec2 (~15.0, 12.0)) (BDDMath.vec2 (0.0, 0.0)))
 
 
 
   fun create_roboplatform (i : int)
                           (p : BDDMath.vec2)
-                          (v : BDDMath.vec2)
-                          (mass : real) : B.body = 
-      let val pixel_width = 80
+                          (v : BDDMath.vec2) : B.body = 
+      let val mass = 1500.0
+          val pixel_width = 80
           val pixel_height = 16
           val meter_width = (Real.fromInt pixel_width) /
                             (Real.fromInt pixelsPerMeter)
@@ -139,7 +139,7 @@ open Types
                            data = RoboPlatform (new_boosters ()),
                            inertia_scale = 1.0
                          })
-          val density = mass / meter_width * meter_height
+          val density = mass / (meter_width * meter_height)
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
@@ -205,7 +205,7 @@ open Types
                            data = PlayButton,
                            inertia_scale = 1.0
                          })
-          val density = 1.0 / meter_width * meter_height
+          val density = 1.0 / (meter_width * meter_height)
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
@@ -249,7 +249,7 @@ open Types
                                         height = pixel_height},
                            inertia_scale = 1.0
                          })
-          val density = mass / meter_width * meter_height
+          val density = mass / (meter_width * meter_height)
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
@@ -471,7 +471,7 @@ open Types
       1 => let val () = 
                    dudebody := 
                     (create_dude (BDDMath.vec2 (~15.0, ~13.4))
-                                 (BDDMath.vec2 (0.0, 0.0)) 0.3)
+                                 (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
@@ -485,8 +485,7 @@ open Types
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))
-                            zero
-                            500.0)
+                            zero)
                val () = GrowArray.update rpboosterarray 0
                                         let val RoboPlatform bst
                                               = B.Body.get_data
@@ -506,7 +505,7 @@ open Types
     | 2 => let val () = 
                    dudebody := 
                     (create_dude (BDDMath.vec2 (~15.0, 11.6))
-                                 (BDDMath.vec2 (0.0, 0.0)) 0.3)
+                                 (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
@@ -524,7 +523,7 @@ open Types
                             i
                             (BDDMath.vec2 (5.0 * Real.fromInt (i - 2), ~13.5))
                             (BDDMath.vec2 (0.0, 0.0))
-                            500.0))
+                                ))
                val _ = 
                    Util.for 0 4 (fn i => 
                        GrowArray.update rpboosterarray i              
@@ -546,7 +545,7 @@ open Types
     | 3 => let val () = 
                    dudebody := 
                     (create_dude (BDDMath.vec2 (~15.0, ~13.4))
-                                 (BDDMath.vec2 (0.0, 0.0)) 0.3)
+                                 (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
@@ -560,8 +559,7 @@ open Types
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))
-                            zero
-                            500.0)
+                            zero)
                val () = GrowArray.update rpboosterarray 0
                                         let val RoboPlatform bst
                                               = B.Body.get_data
