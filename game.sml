@@ -127,14 +127,14 @@ struct
 
 
   fun doreplay NotPlaying = ()
-    | doreplay (Playing start) =
-      let val dt = Time.-(Time.now (), start)
+    | doreplay Playing =
+      let val tc = !tickcounter
           val stillalive = ref false
 
 
           fun applyevents bst nil = nil
             | applyevents bst (lst as ((t, e)::es)) =
-              if (stillalive := true; (Time.>(dt, t)))
+              if (stillalive := true;  t <= tc)
               then (
                     applyevent bst e;
                     applyevents bst es)
@@ -264,7 +264,7 @@ struct
                          in () end
                        | PlayButton =>
                          (case !playback of
-                              Playing _ =>
+                              Playing =>
                               SDL.blitall (playbutton, screen, x - 8, y - 8)
                             | NotPlaying =>
                               SDL.blitall (playbuttoninactive,
@@ -316,10 +316,9 @@ struct
 
 
   fun recordEvent e = 
-      let val dt = Time.-(Time.now (), !recordingstart)
-      in
-      recordingevents := ( (dt, e) :: (!recordingevents))
-      end
+      recordingevents :=
+        ( (!tickcounter, e) :: (!recordingevents))
+
 
   fun keyDown (SDL.SDLK_ESCAPE) _ _ = NONE (* quit the game *)
 
@@ -437,6 +436,7 @@ struct
       (doreplay (!playback);
        applyboosters ();
        dophysics ();
+       tickcounter := (!tickcounter) + 1;
        SOME s
       )
       

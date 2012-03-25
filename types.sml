@@ -21,11 +21,11 @@ struct
                         | RightOn
                         | RightOff
 
-  type scriptstate = {events : (Time.time * BoosterEvent) list,
-                      remaining : (Time.time * BoosterEvent) list ref}
+  type scriptstate = {events : (int * BoosterEvent) list,
+                      remaining : (int * BoosterEvent) list ref}
 
 
-  datatype playbackmode = NotPlaying | Playing of Time.time
+  datatype playbackmode = NotPlaying | Playing
 
  
  (* what else might exist? broken roboplatforms. platforms that follow targets. *)

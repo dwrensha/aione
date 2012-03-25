@@ -47,8 +47,10 @@ open Types
 
   val (playback : playbackmode ref) = ref NotPlaying
 
-  val recordingstart = ref (Time.now ())
-  val (recordingevents : (Time.time * BoosterEvent) list ref ) = ref nil
+  (* number of ticks since start of recording or start of playing. *)
+  val tickcounter = ref 0
+
+  val (recordingevents : (int * BoosterEvent) list ref) = ref nil
 
   fun new_boosters () = {bottom = ref false,
                          left = ref false,
@@ -346,7 +348,8 @@ open Types
 
 
   fun startplaying () =
-      (playback := (Playing (Time.now ()));
+      (playback := Playing;
+       tickcounter := 0;
        Util.for 0 ((GrowArray.length rparray) - 1) (fn i =>
            let val rp = GrowArray.sub rparray i
                val rpboosters = GrowArray.sub rpboosterarray i
@@ -360,9 +363,9 @@ open Types
       let val Dude (dudeboosters, dudedir) = B.Body.get_data (!dudebody)
       in
       (mode := ControlDude;
-       let val dt = Time.-(Time.now(), !recordingstart)
+       let val tc = !tickcounter
        in recordingevents :=
-          (dt, BottomOff)::(dt, LeftOff)::(dt, RightOff):: (!recordingevents)
+          (tc, BottomOff)::(tc, LeftOff)::(tc, RightOff):: (!recordingevents)
        end;
        GrowArray.update scripts i {events = List.rev (!recordingevents),
                                    remaining = ref nil};
@@ -405,17 +408,18 @@ open Types
                   if BDDMath.vec2y d > ~0.5
                   then (* start recording *)
                       (mode := ControlRoboPlatform i;
-                       recordingstart := Time.now ();
+                       tickcounter := 0;
+(*                        recordingstart := Time.now (); *)
                        recordingevents := nil;
 
                        (if !(#right dudeboosters)
                         then recordingevents :=
-                              ((Time.zeroTime, LeftOn) :: (!recordingevents))
+                              ((0, LeftOn) :: (!recordingevents))
                         else ());
 
                        (if !(#left dudeboosters)
                         then recordingevents :=
-                             ((Time.zeroTime, RightOn) :: (!recordingevents))
+                             ((0, RightOn) :: (!recordingevents))
                         else ());
 
 
@@ -431,7 +435,7 @@ open Types
             | plat_hits_dude i (ControlRoboPlatform j) NotPlaying =
                plat_hits_something i (ControlRoboPlatform j)
 
-            | plat_hits_dude _ _ (Playing _) = ()
+            | plat_hits_dude _ _ Playing = ()
               
 
             fun dude_hits_play ControlDude NotPlaying =
@@ -490,8 +494,8 @@ open Types
                                         in bst end
                val _ = 
                    let open Time
-                       val start = fromReal 0.25
-                       val cutoff = fromReal 2.25
+                       val start = 25
+                       val cutoff = 225
                        val es = [(start, BottomOn),
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {
@@ -530,8 +534,8 @@ open Types
                                         in bst end)
                val _ = 
                    let open Time
-                       val cutoff = fromReal 2.0
-                       val es = [(zeroTime, BottomOn),
+                       val cutoff = 200
+                       val es = [(0, BottomOn),
                                  (cutoff, BottomOff)]
                    in Util.for 0 4 (fn i => 
                            GrowArray.update scripts i {
@@ -565,8 +569,8 @@ open Types
                                         in bst end
                val _ = 
                    let open Time
-                       val start = fromReal 0.25
-                       val cutoff = fromReal 2.25
+                       val start = 25
+                       val cutoff = 225
                        val es = [(start, BottomOn),
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {
@@ -585,6 +589,8 @@ open Types
 
   fun gotolevel level =
       (clearworld();
+       tickcounter := 0;
+       playback := NotPlaying;
        if setuplevel (level)
        then SOME (level)
        else SOME (~1)
