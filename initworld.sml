@@ -491,11 +491,22 @@ open Types
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))
                             zero)
-               val () = GrowArray.update rpboosterarray 0
+               val () = GrowArray.update rparray 1
+                         (create_roboplatform 1
+                            (BDDMath.vec2 (16.0, ~13.5))
+                            zero)
+               val () = GrowArray.update rparray 2
+                         (create_roboplatform 2
+                            (BDDMath.vec2 (16.0, ~12.5))
+                            zero)
+               val () = Util.for 0 2 
+                                 (fn i => GrowArray.update rpboosterarray i
                                         let val RoboPlatform bst
                                               = B.Body.get_data
-                                                    (GrowArray.sub rparray 0)
+                                                    (GrowArray.sub rparray i)
                                         in bst end
+                                 )
+
                val _ = 
                    let open Time
                        val start = 25
@@ -504,7 +515,13 @@ open Types
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {
                                events = es,
-                               remaining = ref nil}
+                               remaining = ref nil} ;
+                       GrowArray.update scripts 1 {
+                               events = nil,
+                               remaining = ref nil} ;
+                       GrowArray.update scripts 2 {
+                               events = nil,
+                               remaining = ref nil} 
                    end
            in true end
     | 2 => let val () = 
