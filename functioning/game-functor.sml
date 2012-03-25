@@ -19,7 +19,9 @@ struct
       let val new_observed_time = Time.now ()
           val seconds_to_simulate = Time.toReal(Time.-(new_observed_time,
                                                        !last_simulated_time))
-          val num_ticks = Real.ceil(seconds_to_simulate / Game.seconds_per_tick)
+          val num_ticks = Int.max(
+                           0,
+                           Real.round(seconds_to_simulate / Game.seconds_per_tick))
           val () = last_simulated_time :=
                      Time.+(!last_simulated_time,
                             Time.fromReal(
