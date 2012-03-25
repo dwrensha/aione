@@ -485,9 +485,8 @@ open Types
                val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 6.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
+               val _ = create_playbutton (BDDMath.vec2 (~7.25, ~13.5))
                val _ = create_playbutton (BDDMath.vec2 (7.25, ~13.5))
-               val _ = create_playbutton (BDDMath.vec2 (6.25, ~13.5))
-               val _ = create_playbutton (BDDMath.vec2 (5.25, ~13.5))
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))
