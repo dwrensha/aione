@@ -14,6 +14,7 @@ struct
    val dude1left = Graphics.requireimage "media/graphics/dude1left.png"
    val dude2left = Graphics.requireimage "media/graphics/dude2left.png"
    val dude3left = Graphics.requireimage "media/graphics/dude3left.png"
+   val dudeforward = Graphics.requireimage "media/graphics/dudeforward.png"
    val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
    val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
    val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
@@ -268,11 +269,14 @@ struct
                                            screen, x - 8, y - 8)
                          )
                        | Dude (_, dir) =>
-                         (case !dir of
-                              Right => SDL.blitall (duderight (), screen,
+                         (case (!mode, !dir) of
+                              (ControlRoboPlatform _, _) =>
+                              SDL.blitall (dudeforward, screen,
+                                           x - 10, y - 18)
+                            | (_, Right) => SDL.blitall (duderight (), screen,
+                                                         x - 10, y - 18)
+                            | (_, Left) => SDL.blitall (dudeleft (), screen,
                                                         x - 10, y - 18)
-                            | Left => SDL.blitall (dudeleft (), screen,
-                                                   x - 10, y - 18)
                          )
  
 
