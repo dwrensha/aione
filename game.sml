@@ -23,7 +23,7 @@ struct
 
 
   val (dudeleft, duderight, walk) = 
-      let val frames_per_step = 5
+      let val frames_per_step = 6
           val counter = ref 0
           fun duderight () =
               (case (!counter) div  frames_per_step of
@@ -270,9 +270,9 @@ struct
                        | Dude (_, dir) =>
                          (case !dir of
                               Right => SDL.blitall (duderight (), screen,
-                                                        x - 10, y - 17)
+                                                        x - 10, y - 18)
                             | Left => SDL.blitall (dudeleft (), screen,
-                                                   x - 10, y - 17)
+                                                   x - 10, y - 18)
                          )
  
 
