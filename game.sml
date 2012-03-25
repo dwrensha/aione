@@ -194,9 +194,6 @@ struct
 
   fun dophysics () = 
       let 
-          (* val millis = IntInf.toString (Time.toMilliseconds (diff)) *)
-          
-          (* val timestep = Time.toReal diff *)
           val timestep = seconds_per_tick
           val () = B.World.step (!world, timestep,
                                  10, 10)

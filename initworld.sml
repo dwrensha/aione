@@ -404,12 +404,18 @@ open Types
               let val dp = B.Body.get_position (!dudebody)
                   val pp = B.Body.get_position (GrowArray.sub rparray i)
                   val d = BDDMath.vec2sub (pp, dp)
-              in
+                  val v = BDDMath.vec2length
+                              (B.Body.get_linear_velocity 
+                                (GrowArray.sub rparray i))
+              in 
+                  (* Only start recording if the dude
+                     is low enough relative to the platform
+                     and the platform's velocity is small enough. *)
                   if BDDMath.vec2y d > ~0.5
+                     andalso v < 1.0
                   then (* start recording *)
                       (mode := ControlRoboPlatform i;
                        tickcounter := 0;
-(*                        recordingstart := Time.now (); *)
                        recordingevents := nil;
 
                        (if !(#right dudeboosters)
@@ -422,10 +428,8 @@ open Types
                              ((0, RightOn) :: (!recordingevents))
                         else ());
 
-
                        copy_flip_boosters
                            (GrowArray.sub rpboosterarray i) dudeboosters;
-
 
                        turn_off_boosters dudeboosters
                       )
@@ -593,6 +597,7 @@ open Types
                   
        tickcounter := 0;
        playback := NotPlaying;
+       mode := ControlDude;
        if setuplevel (level)
        then SOME (level)
        else SOME (~1)
