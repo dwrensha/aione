@@ -587,6 +587,10 @@ open Types
 
   fun gotolevel level =
       (clearworld();
+       GrowArray.clear rparray;
+       GrowArray.clear rpboosterarray;
+       GrowArray.clear scripts;
+                  
        tickcounter := 0;
        playback := NotPlaying;
        if setuplevel (level)
