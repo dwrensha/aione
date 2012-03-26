@@ -577,9 +577,11 @@ open Types
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
                val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
 
-               val () = create_ceiling (BDDMath.vec2 (10.0, 0.0)) 16.0 
-               val () = create_ceiling (BDDMath.vec2 (~10.0, 0.0)) 16.0
+               val () = create_ceiling (BDDMath.vec2 (11.0, 0.0)) 14.0 
+               val () = create_ceiling (BDDMath.vec2 (~9.0, 0.0)) 18.0
 
+
+               val () = create_wall (BDDMath.vec2 (0.0, 4.0)) 8.0
 
                val () = create_ceiling (BDDMath.vec2 (~8.0, ~8.0)) 20.0
 
@@ -597,11 +599,11 @@ open Types
                val () = create_wall (BDDMath.vec2 (12.0, ~13.5)) 1.0
 
 
-               val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 6.7))
+               val (x, y) = worldToScreen (BDDMath.vec2 (~15.0, 0.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
 
-               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~7.5))
+               val _ = create_playbutton (BDDMath.vec2 (~10.0, ~7.5))
 
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
