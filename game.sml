@@ -359,8 +359,8 @@ struct
     | keyDown (SDL.SDLK_UP) ControlDude level = 
       let val p = B.Body.get_position (!dudebody)
           val (x, y) = worldToScreen p
-      in if abs (x - (!exitdoorx)) < 15 andalso
-            abs (y - (!exitdoory)) < 15
+      in if abs (x - (!exitdoorx)) < 8 andalso
+            abs (y - (!exitdoory)) < 8
          then (* go to next level *) 
              gotolevel (level + 1)
          else

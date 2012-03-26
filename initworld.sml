@@ -582,6 +582,7 @@ open Types
 
 
                val () = create_wall (BDDMath.vec2 (0.0, 4.0)) 8.0
+(*               val () = create_wall (BDDMath.vec2 (~2.0, ~0.5)) 1.0 *)
 
                val () = create_ceiling (BDDMath.vec2 (~8.0, ~8.0)) 20.0
 
