@@ -3,7 +3,7 @@ MAKE=make
 
 # You shouldn't have to edit anything below this line
 
-MLTON=mlton2
+MLTON=mlton
 
 MLTON_FLAGS=-link-opt "-lSDL_image -ltiff -lpng -ljpeg -lz `sdl-config --libs`" -default-ann 'allowFFI true'
 
