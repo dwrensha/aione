@@ -608,7 +608,7 @@ open Types
 
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
-                            (BDDMath.vec2 (0.0, ~7.5))
+                            (BDDMath.vec2 (~1.0, ~7.5))
                             zero)
                val () = GrowArray.update rpboosterarray 0
                                         let val RoboPlatform bst
