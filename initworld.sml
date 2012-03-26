@@ -570,21 +570,42 @@ open Types
            in true end
     | 3 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, ~13.4))
+                    (create_dude (BDDMath.vec2 (~15.0, ~7.4))
                                  (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
                val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (15.0, 0.0)) 6.0
-               val () = create_ceiling (BDDMath.vec2 (~5.0, 0.0)) 26.0
+
+               val () = create_ceiling (BDDMath.vec2 (12.0, 0.0)) 12.0 
+               val () = create_ceiling (BDDMath.vec2 (~8.0, 0.0)) 20.0
+
+
+               val () = create_ceiling (BDDMath.vec2 (~6.0, ~8.0)) 24.0
+
+               (* make a staircase *)
+               val () = create_wall (BDDMath.vec2 (6.0, ~8.5)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (6.5, ~9.0)) 1.0
+               val () = create_wall (BDDMath.vec2 (7.0, ~9.5)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (7.5, ~10.0)) 1.0
+               val () = create_wall (BDDMath.vec2 (8.0, ~10.5)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (8.5, ~11.0)) 1.0
+               val () = create_wall (BDDMath.vec2 (9.0, ~11.5)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (9.5, ~12.0)) 1.0
+               val () = create_wall (BDDMath.vec2 (10.0, ~12.5)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (10.5, ~13.0)) 1.0
+               val () = create_wall (BDDMath.vec2 (11.0, ~13.5)) 1.0
+
+
                val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 6.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (6.5, ~12.75))
+
+               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~7.5))
+
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
-                            (BDDMath.vec2 (10.0, ~13.5))
+                            (BDDMath.vec2 (4.0, ~7.5))
                             zero)
                val () = GrowArray.update rpboosterarray 0
                                         let val RoboPlatform bst
