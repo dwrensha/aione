@@ -288,7 +288,7 @@ open Types
           val fixture = B.Body.create_fixture_default
                             (body,
                              BDDShape.Polygon
-                                 (BDDPolygon.box (0.2,
+                                 (BDDPolygon.box (0.05,
                                                   meter_height / 2.0)),
                              (uniq (), OtherFixture),
                              10000.0)
@@ -526,18 +526,22 @@ open Types
            in true end
     | 2 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, 11.6))
+                    (create_dude (BDDMath.vec2 (~13.0, 12.6))
                                  (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
                val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
                val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
-               val () = create_ceiling (BDDMath.vec2 (15.0, 11.0)) 1.0
-               val () = create_ceiling (BDDMath.vec2 (~15.0, 11.0)) 1.0
-               val (x, y) = worldToScreen (BDDMath.vec2 (15.0, 11.7))
+               val () = create_ceiling (BDDMath.vec2 (13.0, 12.0)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (~13.0, 12.0)) 1.0
+               val (x, y) = worldToScreen (BDDMath.vec2 (13.0, 12.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (~17.0, ~13.0))
+               val _ = create_playbutton (BDDMath.vec2 (~12.75, ~13.15))
+               val () = create_ceiling (BDDMath.vec2 (~15.5, ~12.5)) 5.0
+(*               val () = create_wall (BDDMath.vec2 (13.0, ~13.3)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (15.5, ~12.8)) 5.0
+*)
                val _ =
                    Util.for 0 4 (fn i => 
                           GrowArray.update rparray i 
@@ -555,7 +559,7 @@ open Types
                                         in bst end)
                val _ = 
                    let open Time
-                       val cutoff = 200
+                       val cutoff = 275
                        val es = [(0, BottomOn),
                                  (cutoff, BottomOff)]
                    in Util.for 0 4 (fn i => 
