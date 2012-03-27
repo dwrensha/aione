@@ -378,9 +378,11 @@ struct
                (case !inputstring of
                     "cheat" => ((cheating := true); SOME level)
                   | mbe_num => 
-                    (case Int.fromString mbe_num of
-                         SOME lev => gotolevel lev
-                       | NONE => SOME level)
+                    if !cheating
+                    then (case Int.fromString mbe_num of
+                              SOME lev => gotolevel lev
+                            | NONE => SOME level)
+                    else SOME level
                )
       in
        inputstring := "";

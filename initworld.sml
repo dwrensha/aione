@@ -570,7 +570,7 @@ open Types
            in true end
     | 3 => let val () = 
                    dudebody := 
-                    (create_dude (BDDMath.vec2 (~15.0, ~11.9))
+                    (create_dude (BDDMath.vec2 (~15.0, ~13.6))
                                  (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
                val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
@@ -580,12 +580,9 @@ open Types
                val (x, y) = worldToScreen (BDDMath.vec2 (13.0, 12.7))
                val () = (exitdoorx := x)
                val () = (exitdoory := y)
-               val _ = create_playbutton (BDDMath.vec2 (~12.75, ~13.15))
+               val _ = create_playbutton (BDDMath.vec2 (~17.25, ~13.25))
 
-               val () = create_ceiling (BDDMath.vec2 (~15.5, ~12.5)) 5.0
-(*               val () = create_wall (BDDMath.vec2 (13.0, ~13.3)) 1.0
-               val () = create_ceiling (BDDMath.vec2 (15.5, ~12.8)) 5.0
-*)
+
                val _ =
                    Util.for 0 2 (fn i => 
                           GrowArray.update rparray i 
