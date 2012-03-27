@@ -570,6 +570,50 @@ open Types
            in true end
     | 3 => let val () = 
                    dudebody := 
+                    (create_dude (BDDMath.vec2 (~15.0, ~11.9))
+                                 (BDDMath.vec2 (0.0, 0.0)))
+               val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (13.0, 12.0)) 1.0
+               val (x, y) = worldToScreen (BDDMath.vec2 (13.0, 12.7))
+               val () = (exitdoorx := x)
+               val () = (exitdoory := y)
+               val _ = create_playbutton (BDDMath.vec2 (~12.75, ~13.15))
+
+               val () = create_ceiling (BDDMath.vec2 (~15.5, ~12.5)) 5.0
+(*               val () = create_wall (BDDMath.vec2 (13.0, ~13.3)) 1.0
+               val () = create_ceiling (BDDMath.vec2 (15.5, ~12.8)) 5.0
+*)
+               val _ =
+                   Util.for 0 2 (fn i => 
+                          GrowArray.update rparray i 
+                           (create_roboplatform
+                            i
+                            (BDDMath.vec2 (5.0 * Real.fromInt (( i) - 2), ~13.5))
+                            (BDDMath.vec2 (0.0, 0.0))
+                                ))
+               val _ = 
+                   Util.for 0 2 (fn i => 
+                       GrowArray.update rpboosterarray i              
+                                        let val RoboPlatform bst
+                                              = B.Body.get_data
+                                                    (GrowArray.sub rparray i)
+                                        in bst end)
+               val _ = 
+                   let open Time
+                       val cutoff = 275
+                       val es = [(0, BottomOn),
+                                 (cutoff, BottomOff)]
+                   in Util.for 0 2 (fn i => 
+                           GrowArray.update scripts i {
+                               events = es,
+                               remaining = ref nil})
+                   end
+           in true end
+    | 4 => let val () = 
+                   dudebody := 
                     (create_dude (BDDMath.vec2 (~15.0, ~7.4))
                                  (BDDMath.vec2 (0.0, 0.0)))
                val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
@@ -617,8 +661,8 @@ open Types
                                         in bst end
                val _ = 
                    let open Time
-                       val start = 25
-                       val cutoff = 225
+                       val start = 200
+                       val cutoff = 400
                        val es = [(start, BottomOn),
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {

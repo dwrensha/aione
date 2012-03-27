@@ -1,4 +1,4 @@
-OUTPUT_APP=RobotFriends
+OUTPUT_APP=epfusm
 ICON=media/graphics/dude.icns
 OUTPUT_EXE=game.exe
 MAKE=make
