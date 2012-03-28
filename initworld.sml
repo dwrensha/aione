@@ -257,8 +257,8 @@ open Types
                                                   meter_height / 2.0)),
                              (uniq (), OtherFixture),
                              density)
-          val () = B.Fixture.set_restitution (fixture, 1.0)
-          val () = B.Fixture.set_friction (fixture, 0.0)
+          val () = B.Fixture.set_restitution (fixture, 0.2)
+          val () = B.Fixture.set_friction (fixture, 0.4)
       in () end
 
 
@@ -487,6 +487,17 @@ open Types
                val () = (exitdoory := y)
                val _ = create_playbutton (BDDMath.vec2 (~7.25, ~13.5))
                val _ = create_playbutton (BDDMath.vec2 (7.25, ~13.5))
+
+               val () = create_text_body
+                        "An Extensible Platform for Upwards and Sidewards Mobility"
+                         (BDDMath.vec2 (~5.0, 9.0))
+                         zero
+                         10.0
+               val () = create_text_body
+                        "by David Renshaw"
+                         (BDDMath.vec2 (~7.0, 7.0))
+                         zero
+                         10.0
                val () = GrowArray.update rparray 0 
                          (create_roboplatform 0
                             (BDDMath.vec2 (10.0, ~13.5))

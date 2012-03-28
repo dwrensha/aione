@@ -289,6 +289,7 @@ struct
 
   val inputstring = ref ""
   val cheating = ref false
+  val debugging = ref false
 
   fun render screen (~1) =  (* ~1 means you win *)
       (
@@ -310,9 +311,13 @@ struct
     
 (* debugging *)
     Timing.tick(); 
-    Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
-    Font.Normal.draw (screen, 0, 20, "input string: " ^ (!inputstring));
-    if !cheating then Font.Normal.draw (screen, 0, 40, "CHEATING") else ();
+  
+   if !debugging
+   then
+    (Font.Normal.draw (screen, 0, 0, "fps: " ^ (Real.toString (Timing.fps() )));
+     Font.Normal.draw (screen, 0, 20, "input string: " ^ (!inputstring));
+     if !cheating then Font.Normal.draw (screen, 0, 40, "CHEATING") else ())
+   else ();
 
     SDL.flip screen
   )
@@ -377,6 +382,7 @@ struct
       let val newlevel = 
                (case !inputstring of
                     "cheat" => ((cheating := true); SOME level)
+                  | "d" => ((debugging := not (!debugging)); SOME level)
                   | mbe_num => 
                     if !cheating
                     then (case Int.fromString mbe_num of
