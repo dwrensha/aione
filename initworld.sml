@@ -412,7 +412,7 @@ open Types
                      is low enough relative to the platform
                      and the platform's velocity is small enough. *)
                   if BDDMath.vec2y d > ~0.5
-                     andalso v < 1.0
+                     andalso v < 2.0
                   then (* start recording *)
                       (mode := ControlRoboPlatform i;
                        tickcounter := 0;
@@ -437,7 +437,8 @@ open Types
               end
 
             | plat_hits_dude i (ControlRoboPlatform j) NotPlaying =
-               plat_hits_something i (ControlRoboPlatform j)
+              ()
+               (* plat_hits_something i (ControlRoboPlatform j) *)
 
             | plat_hits_dude _ _ Playing = ()
               
