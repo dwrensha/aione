@@ -679,6 +679,56 @@ open Types
                                remaining = ref nil}
                    end
            in true end
+    | 5 => let val () = 
+                   dudebody := 
+                    (create_dude (BDDMath.vec2 (~15.0, ~13.6))
+                                 (BDDMath.vec2 (0.0, 0.0)))
+               val () = create_wall (BDDMath.vec2 (~18.0, 0.0)) 28.0
+               val () = create_wall (BDDMath.vec2 (18.0, 0.0)) 28.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, 14.0)) 36.0
+               val () = create_ceiling (BDDMath.vec2 (0.0, ~14.0)) 36.0
+
+               val () = create_text_body
+                        "You win!"
+                         (BDDMath.vec2 (~7.0, 7.0))
+                         zero
+                         10.0       
+
+               val (x, y) = worldToScreen (BDDMath.vec2 (100.0, 100.0))
+               val () = (exitdoorx := x)
+               val () = (exitdoory := y)
+
+               val _ = create_playbutton (BDDMath.vec2 (~17.25, ~13.25))
+
+               val num_plats = 100
+               val _ =
+                   Util.for 0 (num_plats - 1) (fn i => 
+                          GrowArray.update rparray i 
+                           (create_roboplatform
+                            i
+                            (BDDMath.vec2 (5.0 * Real.fromInt (( Int.mod(i,5) - 2)),
+                                           ~13.5 + Real.fromInt (i div 5)))
+                            (BDDMath.vec2 (0.0, 0.0))
+                                ))
+               val _ = 
+                   Util.for 0 (num_plats - 1) (fn i => 
+                       GrowArray.update rpboosterarray i              
+                                        let val RoboPlatform bst
+                                              = B.Body.get_data
+                                                    (GrowArray.sub rparray i)
+                                        in bst end)
+               val _ = 
+                   let open Time
+                       val cutoff = 275
+                       val es = [(0, BottomOn),
+                                 (cutoff, BottomOff)]
+                   in Util.for 0 (Int.-(num_plats, 1)) (fn i => 
+                           GrowArray.update scripts i {
+                               events = es,
+                               remaining = ref nil})
+                   end
+           in true end
+
 
     | _ => false
     )
