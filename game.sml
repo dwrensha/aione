@@ -2,59 +2,6 @@ structure Game :> GAME =
 struct
   open Types
 
-
-   val roboplat = Graphics.requireimage "media/graphics/roboplat.png"
-   val roboplatrecording = Graphics.requireimage "media/graphics/roboplatrecording.png"
-   val bottombooster = Graphics.requireimage "media/graphics/bottombooster.png"
-   val leftbooster = Graphics.requireimage "media/graphics/leftbooster.png"
-   val rightbooster = Graphics.requireimage "media/graphics/rightbooster.png"
-   val dude1right = Graphics.requireimage "media/graphics/dude1right.png"
-   val dude2right = Graphics.requireimage "media/graphics/dude2right.png"
-   val dude3right = Graphics.requireimage "media/graphics/dude3right.png"
-   val dude1left = Graphics.requireimage "media/graphics/dude1left.png"
-   val dude2left = Graphics.requireimage "media/graphics/dude2left.png"
-   val dude3left = Graphics.requireimage "media/graphics/dude3left.png"
-   val dudeforward = Graphics.requireimage "media/graphics/dudeforward.png"
-   val duderecording = Graphics.requireimage "media/graphics/duderecording.png"
-   val playbutton = Graphics.requireimage "media/graphics/playbutton.png"
-   val playbuttoninactive = Graphics.requireimage "media/graphics/playbuttoninactive.png"
-   val exitdoor = Graphics.requireimage "media/graphics/exitdoor.png"
-   val victory = Graphics.requireimage "media/graphics/victory.png"
-   val background = Graphics.requireimage "media/graphics/background.png"
-
-
-
-  val (dudeleft, duderight, walk) = 
-      let val frames_per_step = 10
-          val counter = ref 0
-          fun duderight () =
-              (case (!counter) div  frames_per_step of
-                 0 => dude1right
-               | 1  => dude2right
-               | 2  => dude3right
-               | 3  => dude2right
-               | _ => raise Fail "Impossible"
-              )
-          fun dudeleft () =
-              (case (!counter) div  frames_per_step of
-                 0 => dude1left
-               | 1  => dude2left
-               | 2  => dude3left
-               | 3  => dude2left
-               | _ => raise Fail "Impossible"
-              )
-          fun walk () =
-              (counter := (!counter + 1);
-               if (!counter) >= frames_per_step * 4 
-               then counter := 0
-               else () )
-      in 
-        (dudeleft, duderight, walk)
-      end
-
-
-
-
   open InitWorld
 
   exception CanJump
@@ -188,7 +135,7 @@ struct
                    else ()
 
           (* get the sprites to animate *)
-          val () = if !left orelse !right then walk () else ()
+          val () = if !left orelse !right then Graphics.walk () else ()
 
       in () end
 
@@ -240,21 +187,23 @@ struct
                                  (case (!mode, fixtype) of
                                       (ControlRoboPlatform i,
                                        RoboPlatformFixture j) =>
-                                      if i = j then roboplatrecording else roboplat
-                                    | _ => roboplat)
+                                      if i = j
+                                      then Graphics.roboplatrecording
+                                      else Graphics.roboplat
+                                    | _ => Graphics.roboplat)
                              val () =
                                  if !bottom
-                                 then SDL.blitall (bottombooster, screen,
+                                 then SDL.blitall (Graphics.bottombooster, screen,
                                                    x - 3, y + 7)
                                  else ()
                              val () =
                                  if !left
-                                 then SDL.blitall (leftbooster, screen,
+                                 then SDL.blitall (Graphics.leftbooster, screen,
                                                    x - 49, y - 3)
                                  else ()
                              val () =
                                  if !right
-                                 then SDL.blitall (rightbooster, screen,
+                                 then SDL.blitall (Graphics.rightbooster, screen,
                                                    x + 40, y - 3)
                                  else ()
                              val x1 = x - 40
@@ -264,20 +213,24 @@ struct
                        | PlayButton =>
                          (case !playback of
                               Playing =>
-                              SDL.blitall (playbutton, screen, x - 8, y - 8)
+                              SDL.blitall (Graphics.playbutton, screen, x - 8, y - 8)
                             | NotPlaying =>
-                              SDL.blitall (playbuttoninactive,
+                              SDL.blitall (Graphics.playbuttoninactive,
                                            screen, x - 8, y - 8)
                          )
                        | Dude (_, dir) =>
                          (case (!mode, !dir) of
                               (ControlRoboPlatform _, _) =>
-                              SDL.blitall (duderecording, screen,
+                              SDL.blitall (Graphics.duderecording, screen,
                                            x - 9, y - 19)
-                            | (_, Right) => SDL.blitall (duderight (), screen,
-                                                         x - 10, y - 18)
-                            | (_, Left) => SDL.blitall (dudeleft (), screen,
-                                                        x - 10, y - 18)
+                            | (_, Right) => SDL.blitall
+                                                (Graphics.duderight (),
+                                                 screen,
+                                                 x - 10, y - 18)
+                            | (_, Left) => SDL.blitall
+                                               (Graphics.dudeleft (),
+                                                screen,
+                                                x - 10, y - 18)
                          )
  
 
@@ -295,7 +248,7 @@ struct
       (
        SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
        
-       SDL.blitall (victory, screen, 26, 29);
+       SDL.blitall (Graphics.victory, screen, 26, 29);
        Font.Huge.draw (screen, 100, 290, "you win");
        SDL.flip screen
       )
@@ -304,8 +257,8 @@ struct
   ( (* the usual render function *)
 (*    SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60)); *)
 
-    SDL.blitall (background, screen, 0, 0);
-    SDL.blitall (exitdoor, screen, (!exitdoorx) - 8 , (!exitdoory) - 15 );
+    SDL.blitall (Graphics.background, screen, 0, 0);
+    SDL.blitall (Graphics.exitdoor, screen, (!exitdoorx) - 8 , (!exitdoory) - 15 );
 
     drawbodies screen (B.World.get_body_list (!world));
     
