@@ -1,3 +1,8 @@
-This game started as an entry to Ludum Dare 22
+This game was originally an entry to Ludum Dare 22.
+It was later expanded into a submission to SIGBOVIK 2012.
+
+To build the game, you need to make a symlink in this directory to the
+appropriate makefile in the "functioning" directory.
+
 
 David Renshaw
