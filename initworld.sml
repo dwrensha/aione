@@ -522,7 +522,7 @@ open Types
                val _ = 
                    let open Time
                        val start = 25
-                       val cutoff = 225
+                       val cutoff = 220
                        val es = [(start, BottomOn),
                                  (cutoff, BottomOff)]
                    in  GrowArray.update scripts 0 {

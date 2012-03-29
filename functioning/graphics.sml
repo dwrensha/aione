@@ -25,7 +25,6 @@ struct
    val playbutton = requireimage "media/graphics/playbutton.png"
    val playbuttoninactive = requireimage "media/graphics/playbuttoninactive.png"
    val exitdoor = requireimage "media/graphics/exitdoor.png"
-   val victory = requireimage "media/graphics/victory.png"
    val background = requireimage "media/graphics/background.png"
 
 

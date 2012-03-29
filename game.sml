@@ -244,12 +244,10 @@ struct
   val cheating = ref false
   val debugging = ref false
 
-  fun render screen (~1) =  (* ~1 means you win *)
+  fun render screen (~1) =  (* ~1 means end *)
       (
        SDL.clearsurface (screen, SDL.color (0w00,0w60,0w60,0w60));
-       
-       SDL.blitall (Graphics.victory, screen, 26, 29);
-       Font.Huge.draw (screen, 100, 290, "you win");
+       Font.Huge.draw (screen, 100, 290, "the end");
        SDL.flip screen
       )
 
