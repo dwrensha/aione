@@ -411,7 +411,7 @@ open Types
                   (* Only start recording if the dude
                      is low enough relative to the platform
                      and the platform's velocity is small enough. *)
-                  if BDDMath.vec2y d > ~0.75
+                  if BDDMath.vec2y d > ~1.0
                      andalso v < 2.0
                   then (* start recording *)
                       (mode := ControlRoboPlatform i;
