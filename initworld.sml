@@ -690,7 +690,7 @@ open Types
 
                val () = create_text_body
                         "You win!"
-                         (BDDMath.vec2 (~7.0, 7.0))
+                         (BDDMath.vec2 (15.0, 7.0))
                          zero
                          10.0       
 
