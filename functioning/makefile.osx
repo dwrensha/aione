@@ -2,6 +2,7 @@ OUTPUT_APP=epfusm
 ICON=media/graphics/dude.icns
 OUTPUT_EXE=game.exe
 MAKE=make
+MLTON=mlton
 
 # You shoudln't have to edit anything below this line
 
@@ -26,20 +27,20 @@ bin/sdlml.o: bin sdlml/sdlml.c
 .PHONY: game
 game: bin/sdlml.o bin/sdlmain.o
 	export MACOSX_DEPLOYMENT_TARGET=${VERSION_TARGET}
-	mlton $(MLTON_FLAGS) -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
+	$(MLTON) $(MLTON_FLAGS) -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
 	$(MAKE) desktop
 
 .PHONY: cgame
 cgame: bin/sdlml.o bin/sdlmain.o
 	export MACOSX_DEPLOYMENT_TARGET=${VERSION_TARGET}
-	mlton $(MLTON_FLAGS) -codegen c -keep g -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
+	$(MLTON) $(MLTON_FLAGS) -codegen c -keep g -output $(OUTPUT_EXE) game.cm bin/sdlml.o bin/sdlmain.o
 
 .PHONY: examples/* examples/*/
 examples/*:
 	$(MAKE) $@/
 examples/*/: bin/sdlml.o bin/sdlmain.o
 	export MACOSX_DEPLOYMENT_TARGET=${VERSION_TARGET}
-	mlton $(MLTON_FLAGS) -output $(OUTPUT_EXE) $@sources.cm bin/sdlml.o bin/sdlmain.o
+	$(MLTON) $(MLTON_FLAGS) -output $(OUTPUT_EXE) $@sources.cm bin/sdlml.o bin/sdlmain.o
 	$(MAKE) desktop
 
 .PHONY:app

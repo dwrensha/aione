@@ -90,7 +90,7 @@ open Types
                            allow_sleep = false,
                            awake = true,
                            fixed_rotation = true,
-                           bullet = false,
+                           bullet = true,
                            active = true,
                            data = Dude (new_boosters(), ref Right),
                            inertia_scale = 1.0
