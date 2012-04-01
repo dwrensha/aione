@@ -38,8 +38,7 @@ struct
 
   val () = Game.initscreen screen
 
-  val () = last_observed_time := (Time.now())
-  val () = last_simulated_time := (!last_observed_time)
+  val () = last_simulated_time := (Time.now())
      
   val () = loop Game.initstate
 end
