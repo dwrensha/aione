@@ -2,8 +2,6 @@ functor RunGame (Game : GAME) =
 struct
   val screen = SDL.makescreen (Game.width, Game.height)
 
-
-  val last_observed_time = ref (Time.zeroTime)
   val last_simulated_time = ref (Time.zeroTime)
 
 
@@ -21,11 +19,12 @@ struct
                                                        !last_simulated_time))
           val num_ticks = Int.max(
                            0,
-                           Real.round(seconds_to_simulate / Game.seconds_per_tick))
+                           Real.round(seconds_to_simulate * Game.ticks_per_second))
+
           val () = last_simulated_time :=
                      Time.+(!last_simulated_time,
                             Time.fromReal(
-                            Real.fromInt(num_ticks) * Game.seconds_per_tick))
+                            Real.fromInt(num_ticks) / Game.ticks_per_second))
       in
           case option_iterate Game.tick s num_ticks of
               NONE => ()

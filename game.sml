@@ -139,11 +139,11 @@ struct
 
       in () end
 
-  val seconds_per_tick = 0.01
+  val ticks_per_second = 100.0
 
   fun dophysics () = 
       let 
-          val timestep = seconds_per_tick
+          val timestep = (1.0 / ticks_per_second)
           val () = B.World.step (!world, timestep,
                                  10, 10)
 
