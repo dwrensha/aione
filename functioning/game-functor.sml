@@ -14,17 +14,16 @@ struct
 
 
   fun loop s =
-      let val new_observed_time = Time.now ()
-          val seconds_to_simulate = Time.toReal(Time.-(new_observed_time,
-                                                       !last_simulated_time))
-          val num_ticks = Int.max(
-                           0,
-                           Real.round(seconds_to_simulate * Game.ticks_per_second))
-
-          val () = last_simulated_time :=
-                     Time.+(!last_simulated_time,
-                            Time.fromReal(
-                            Real.fromInt(num_ticks) / Game.ticks_per_second))
+      let local open Time
+          in
+            val new_observed_time = now ()
+            val sim_seconds = toReal (new_observed_time - (!last_simulated_time))
+            val num_ticks = Int.max(0,
+                                    Real.round(sim_seconds * Game.ticks_per_second))
+            val () = last_simulated_time :=
+                     (!last_simulated_time) + 
+                      fromReal(Real.fromInt(num_ticks) / Game.ticks_per_second)
+          end
       in
           case option_iterate Game.tick s num_ticks of
               NONE => ()
