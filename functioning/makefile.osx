@@ -4,7 +4,7 @@ OUTPUT_EXE=game.exe
 MAKE=make
 MLTON=mlton
 
-# You shoudln't have to edit anything below this line
+# You shouldn't have to edit anything below this line
 
 VERSION_TARGET=10.7
 FRAMEWORKS=functioning/OSX/Frameworks
